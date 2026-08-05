@@ -23,7 +23,8 @@ namespace mali
         std::stringstream prevout;
         std::stringstream preverr;
 
-        std::cout << m_name << " : " << m_rootPath << std::endl;
+        std::cout << "Test name : " << m_name << "\n" 
+                  << "Test path : " << m_rootPath << std::endl;
 
         for (const TaskData &task : m_tasks)
         {

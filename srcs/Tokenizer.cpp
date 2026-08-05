@@ -84,7 +84,7 @@ namespace mali
         return str;
     }
 
-    Token::Token(const std::string &value, const char *type) : value(value), type(type)
+    Token::Token(const std::string &value, const char *type, int line) : value(value), type(type), line(line)
     {
     }
 }

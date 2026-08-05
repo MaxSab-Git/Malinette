@@ -1,13 +1,13 @@
 TARGET = bin/Malinette
 SRC_DIR = srcs/
-OBJ_DIR = obj/
+OBJ_DIR = $(SRC_DIR)obj/
 INCLUDE_DIR = include/
 SOURCES = $(SRC_DIR)main.cpp \
 			$(SRC_DIR)Test.cpp \
 			$(SRC_DIR)GlobalTokenizer.cpp \
 			$(SRC_DIR)Tokenizer.cpp \
 			$(SRC_DIR)TestCommandTokenizer.cpp
-OBJECTS = $(SOURCES:$(SRC_DIR)%.cpp=$(SRC_DIR)$(OBJ_DIR)%.o)
+OBJECTS = $(SOURCES:$(SRC_DIR)%.cpp=$(OBJ_DIR)%.o)
 COMPILER = c++
 FLAGS = -Wall -Wextra -Werror -O2
 
@@ -17,8 +17,8 @@ $(TARGET):$(OBJECTS)
 	mkdir -p bin
 	$(COMPILER) $(FLAGS) $(OBJECTS) -o $(TARGET)
 
-$(SRC_DIR)$(OBJ_DIR)%.o:$(SRC_DIR)%.cpp
-	mkdir -p $(SRC_DIR)$(OBJ_DIR)
+$(OBJ_DIR)%.o:$(SRC_DIR)%.cpp
+	mkdir -p $(OBJ_DIR)
 	$(COMPILER) $(FLAGS) -I$(INCLUDE_DIR) -c $< -o $@
 
 .PHONY: all clean fclean re launch

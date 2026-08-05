@@ -11,16 +11,21 @@ namespace mali
     {
         std::string token;
         char c;
+        int line = tokens.empty() ? 1 : tokens.back().line + 1;
 
+        std::streampos tpos = stream.tellg();
         c = skipChar(stream, '\n');
+        line += stream.tellg() - tpos - 1;
         if (c != '\t' || !stream.read(&c, 1))
         {
-            stream.seekg(-1, std::ios::cur);
+            m_context = "unchanged";
+            stream.seekg(tpos, std::ios::beg);
             return false;
         }
+        m_context = "bad";
         if (c == ':')
         {
-            if (!tokenizeControl(stream, tokens, "function"))
+            if (!tokenizeControl(stream, tokens, "function", line))
                 return false;
             stream.read(&c, 1);
         }
@@ -29,7 +34,7 @@ namespace mali
             c = getChar(stream, token, c, isCommand);
             if (token.empty() || !stream)
                 return false;
-            tokens.emplace_back(token, "command");
+            tokens.emplace_back(token, "command", line);
             token.clear();
 
             while (c == ' ')
@@ -38,7 +43,7 @@ namespace mali
                     return false;
                 if (c == ':')
                 {
-                    if (!tokenizeControl(stream, tokens, "getter"))
+                    if (!tokenizeControl(stream, tokens, "getter", line))
                         return false;
                     stream.read(&c, 1);
                 }
@@ -47,13 +52,14 @@ namespace mali
                     c = getChar(stream, token, c, isCommand);
                     if (token.empty() || !stream)
                         return false;
-                    tokens.emplace_back(token, "commandArgument");
+                    tokens.emplace_back(token, "commandArgument", line);
                     token.clear();
                 }
             }
         }
         if (c != '\n')
             return false;
+        m_context = "good";
         return true;
     }
 
@@ -62,7 +68,7 @@ namespace mali
         return isPrintable(c) && c != ' ';
     }
 
-    bool TestCommandTokenizer::tokenizeControl(std::istream &stream, std::vector<Token> &tokens, const char *type)
+    bool TestCommandTokenizer::tokenizeControl(std::istream &stream, std::vector<Token> &tokens, const char *type, int line)
     {
         std::string token;
         char c;
@@ -72,7 +78,7 @@ namespace mali
         c = getChar(stream, token, c, isAlpha);
         if (token.empty() || !stream)
             return false;
-        tokens.emplace_back(token, type);
+        tokens.emplace_back(token, type, line);
         token.clear();
         if (c == '(')
         {
@@ -83,7 +89,7 @@ namespace mali
                     c = skipChar(stream, ' ');
                 if (token.empty() || !stream)
                     return false;
-                tokens.emplace_back(token, "parameter");
+                tokens.emplace_back(token, "parameter", line);
                 token.clear();
             } while (c == ',');
             if (c != ')' || !stream.read(&c, 1))
@@ -96,7 +102,7 @@ namespace mali
             c = getChar(stream, token, c, isAlpha);
             if (token.empty() || !stream)
                 return false;
-            tokens.emplace_back(token, "controlArgument");
+            tokens.emplace_back(token, "controlArgument", line);
             token.clear();
         }
         if (c != ':')

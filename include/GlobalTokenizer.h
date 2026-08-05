@@ -4,7 +4,7 @@
 
 namespace mali
 {
-    class GlobalTokenizer : Tokenizer
+    class GlobalTokenizer : public Tokenizer
     {
     public:
         GlobalTokenizer();

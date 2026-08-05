@@ -10,17 +10,21 @@ namespace mali
     {
         std::string token;
         char c;
+        int line = tokens.empty() ? 1 : tokens.back().line + 1;
 
-        c = getChar(stream, token, skipChar(stream, '\n'), isTestName);
+        std::streampos tpos = stream.tellg();
+        c = skipChar(stream, '\n');
+        line += stream.tellg() - tpos - 1;
+        c = getChar(stream, token, c, isTestName);
         if (trim(token).empty() || c != ':')
             return false;
-        tokens.emplace_back(token, "testName");
+        tokens.emplace_back(token, "testName", line);
         token.clear();
 
         c = getChar(stream, token, skipChar(stream, ' '), isTestName);
         if (trim(token).empty() || c != '\n')
             return false;
-        tokens.emplace_back(token, "testContext");
+        tokens.emplace_back(token, "testContext", line);
         token.clear();
 
         return true;

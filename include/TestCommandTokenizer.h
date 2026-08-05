@@ -4,7 +4,7 @@
 
 namespace mali
 {
-    class TestCommandTokenizer : Tokenizer
+    class TestCommandTokenizer : public Tokenizer
     {
     public:
         TestCommandTokenizer();
@@ -13,6 +13,6 @@ namespace mali
 
         static bool isCommand(char c);
     private:
-        bool tokenizeControl(std::istream &stream, std::vector<Token> &tokens, const char *type);
+        bool tokenizeControl(std::istream &stream, std::vector<Token> &tokens, const char *type, int line);
     };
 }

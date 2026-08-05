@@ -8,10 +8,11 @@ namespace mali
 {
     struct Token
     {
-        Token(const std::string& value, const char *type);
+        Token(const std::string& value, const char *type, int line);
 
         std::string value;
         const char *type;
+        int line;
     };
 
     class Tokenizer
