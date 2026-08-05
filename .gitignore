@@ -1,0 +1,4 @@
+bin/*
+srcs/obj/
+tests/trace.txt
+user/
