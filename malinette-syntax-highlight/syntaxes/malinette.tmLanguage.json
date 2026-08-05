@@ -1,0 +1,60 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "malinette",
+	"patterns": [
+		{
+			"include": "#testContext"
+		},
+		{
+			"include": "#testOperation"
+		},
+		{
+			"include": "#testCommand"
+		}
+	],
+	"repository": {
+		"testContext": {
+			"patterns": [
+				{
+					"match": "^([\\x20-\\x7E]+)\\ *:\\ *([\\x20-\\x7E]+)\\n",
+					"captures": {
+						"1": {
+							"name": "entity.name.function.malinette"
+						},
+						"2": {
+							"name": "variable.other.malinette"
+						}
+					}
+				}
+			]
+		},
+		"testCommand": {
+			"patterns": [
+				{
+					"match": "^\\t([\\x21-\\x7E]+)(.*)\\n",
+					"captures": {
+						"2": {
+							"name": "variable.parameter.malinette"
+						},
+						"1": {
+							"name": "entity.name.tag.malinette"
+						}
+					}
+				}
+			]
+		},
+		"testOperation": {
+			"patterns": [
+				{
+					"match": "^\\t(:[\\x21-\\x7E]+:)\\n",
+					"captures": {
+						"1": {
+							"name": "keyword.operator.malinette"
+						}
+					}
+				}
+			]
+		}
+	},
+	"scopeName": "source.malinette"
+}

@@ -1,0 +1,25 @@
+{
+  "name": "malinette-syntax-highlight",
+  "displayName": "Malinette syntax highlight",
+  "description": "syntax highlight for .mali files",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.125.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "malinette",
+      "aliases": ["malinette", "malinette"],
+      "extensions": [".mali"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "malinette",
+      "scopeName": "source.malinette",
+      "path": "./syntaxes/malinette.tmLanguage.json"
+    }]
+  }
+}
