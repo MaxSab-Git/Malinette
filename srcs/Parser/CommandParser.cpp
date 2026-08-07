@@ -5,25 +5,21 @@ namespace mali
 {
     bool CommandParser::operator()(ParserState &state)
     {
-        state.addArg();
-        if (state.next())
+        while (state.ok())
         {
-            while (state.ok())
+            if (state.checkTokenType("getter"))
             {
-                if (state.checkTokenType("getter"))
-                {
-                    GetterParser parser;
-                    if (!parser(state))
-                        return false;
-                }
-                else if (state.checkTokenType("commandArgument"))
-                {
-                    state.addArg();
-                    state.next();
-                }
-                else
-                    break;
+                GetterParser parser;
+                if (!parser(state))
+                    return false;
             }
+            else if (state.checkTokenType("commandArgument"))
+            {
+                state.addArg();
+                state.next();
+            }
+            else
+                break;
         }
         state.pushCommand();
         return true;

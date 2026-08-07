@@ -1,12 +1,13 @@
 Test subjects 00: subjects/ex00
+	:randalphanum(32) program_name:
 	/bin/mkdir -p user
-	/bin/cc -Wall -Wextra -Werror test.c -o user/test.out
+	/bin/cc -Wall -Wextra -Werror test.c -o :concat "user/" program_name:
 
 	:loop(10):
 	:randprint c:
 	/bin/echo :get c:
 	:compare:
-	./user/test.out :get c:
+	.:concat "./user/" program_name: :get c:
 	:end:
 
 Test subjects 01: subjects/ex01

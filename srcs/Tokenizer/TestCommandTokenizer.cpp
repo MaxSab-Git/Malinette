@@ -42,10 +42,23 @@ namespace mali
                 } while (stream.read(&c, 1) && c == '\"');
             }
             else
+            {
                 c = getChar(stream, token, c, isCommand);
-            if (token.empty() || !stream)
-                return false;
-            tokens.emplace_back(token, "command", line);
+                if (token == "." && c == ':')
+                {
+                    if (!tokenizeControl(stream, tokens, "commandGetter", line))
+                        return false;
+                    stream.read(&c, 1);
+                    if (!stream)
+                        return false;
+                }
+                else
+                {
+                    if (token.empty() || !stream)
+                        return false;
+                    tokens.emplace_back(token, "command", line);
+                }
+            }
             token.clear();
 
             while (c == ' ')
@@ -87,7 +100,7 @@ namespace mali
 
     bool TestCommandTokenizer::isCommand(char c)
     {
-        return isPrintable(c) && c != ' ' && c != ':';
+        return isPrintable(c) && c != ' ' && c != ':' && c != '\"';
     }
 
     bool TestCommandTokenizer::isVariable(char c)

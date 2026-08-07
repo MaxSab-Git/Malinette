@@ -4,9 +4,11 @@
 namespace mali
 {
     const std::pair<const char *, bool (*)(ParserState &state)> GetterParser::s_supportedFunctions[] =
-    {
+        {
             std::make_pair("get", GetterParser::doGet),
             std::make_pair("malifile", GetterParser::doMalifile),
+            std::make_pair("malidir", GetterParser::doMalidir),
+            std::make_pair("concat", GetterParser::doConcat),
     };
 
     bool GetterParser::operator()(ParserState &state)
@@ -39,7 +41,7 @@ namespace mali
         return false;
     }
 
-    bool GetterParser::doMalifile(ParserState& state)
+    bool GetterParser::doMalifile(ParserState &state)
     {
         if (state.next() && state.checkTokenType("controlArgument"))
         {
@@ -53,6 +55,48 @@ namespace mali
             else
                 std::cerr << "Line " << state.getLine() << ": " << state.getValue() << " is not a file." << std::endl;
         }
+        return true;
+    }
+
+    bool GetterParser::doMalidir(ParserState &state)
+    {
+        if (state.next() && state.checkTokenType("controlArgument"))
+        {
+            if (std::filesystem::is_directory(state.getValue()))
+            {
+                std::filesystem::path path = std::filesystem::relative(state.getValue(), state.getTestRootPath());
+                state.addArg(path);
+                state.next();
+                return true;
+            }
+            else
+                std::cerr << "Line " << state.getLine() << ": " << state.getValue() << " is not a file." << std::endl;
+        }
+        return true;
+    }
+
+    bool GetterParser::doConcat(ParserState &state)
+    {
+        std::string result;
+        while (state.next())
+        {
+            if (state.checkTokenType("variableName"))
+            {
+                const std::string *variable = state.getVar(state.getValue());
+                if (variable)
+                    result.append(*variable);
+                else
+                {
+                    std::cerr << "Line " << state.getLine() << ": Variable \"" << state.getValue() << "\" is not initialized." << std::endl;
+                    return false;
+                }
+            }
+            else if (state.checkTokenType("controlArgument"))
+                result.append(state.getValue());
+            else
+                break;
+        }
+        state.addArg(result);
         return true;
     }
 }
