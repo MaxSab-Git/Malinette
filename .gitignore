@@ -1,4 +1,4 @@
 /bin/*
 /srcs/obj/
-/tests/trace.txt
+trace.txt
 user/
