@@ -11,7 +11,7 @@ Test subjects 00: subjects/ex00
 
 Test subjects 01: subjects/ex01
 	/bin/mkdir -p user
-	/bin/cc -Wall -Wextra -Werror put_char.c ../../testfiles/ex00main.c -o user/put_char
+	/bin/cc -Wall -Wextra -Werror put_char.c :malifile "testfiles/ex00main.c": -o user/put_char
 
 	:loop(10):
 	:randprint(16) str:

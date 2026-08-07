@@ -1,12 +1,23 @@
 TARGET = bin/Malinette
 SRC_DIR = srcs/
+SRC_TOKENIZER_DIR = $(SRC_DIR)Tokenizer/
+SRC_PARSER_DIR = $(SRC_DIR)Parser/
 OBJ_DIR = $(SRC_DIR)obj/
 INCLUDE_DIR = include/
 SOURCES = $(SRC_DIR)main.cpp \
 			$(SRC_DIR)Test.cpp \
-			$(SRC_DIR)GlobalTokenizer.cpp \
-			$(SRC_DIR)Tokenizer.cpp \
-			$(SRC_DIR)TestCommandTokenizer.cpp
+			$(SRC_TOKENIZER_DIR)GlobalTokenizer.cpp \
+			$(SRC_TOKENIZER_DIR)TestCommandTokenizer.cpp \
+			$(SRC_TOKENIZER_DIR)Tokenizer.cpp \
+			$(SRC_PARSER_DIR)TestNameParser.cpp \
+			$(SRC_PARSER_DIR)TestContextParser.cpp \
+			$(SRC_PARSER_DIR)InstructionParser.cpp \
+			$(SRC_PARSER_DIR)CommandParser.cpp \
+			$(SRC_PARSER_DIR)FunctionParser.cpp \
+			$(SRC_PARSER_DIR)GetterParser.cpp \
+			$(SRC_PARSER_DIR)ParameterParser.cpp \
+			$(SRC_PARSER_DIR)ParserState.cpp \
+			$(SRC_PARSER_DIR)Parser.cpp
 OBJECTS = $(SOURCES:$(SRC_DIR)%.cpp=$(OBJ_DIR)%.o)
 COMPILER = c++
 FLAGS = -Wall -Wextra -Werror -O2
@@ -18,7 +29,7 @@ $(TARGET):$(OBJECTS)
 	$(COMPILER) $(FLAGS) $(OBJECTS) -o $(TARGET)
 
 $(OBJ_DIR)%.o:$(SRC_DIR)%.cpp
-	mkdir -p $(OBJ_DIR)
+	mkdir -p $$(dirname $@)
 	$(COMPILER) $(FLAGS) -I$(INCLUDE_DIR) -c $< -o $@
 
 .PHONY: all clean fclean re launch

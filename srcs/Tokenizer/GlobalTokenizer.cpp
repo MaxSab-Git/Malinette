@@ -1,4 +1,4 @@
-#include <GlobalTokenizer.h>
+#include <Tokenizer/GlobalTokenizer.h>
 
 namespace mali
 {

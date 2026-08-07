@@ -22,11 +22,13 @@ namespace mali
         };
 
     public:
-        Test(const char *name);
+        Test(const std::string& name = "");
 
-        void setRootPath(const char *rootPath);
+        void setRootPath(const std::string& name);
         int run() const;
         void addTask(Task&& task, TaskType type);
+
+        const std::string& getRootPath() const;
 
     private:
         std::string m_name;

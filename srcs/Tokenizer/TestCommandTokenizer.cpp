@@ -1,4 +1,4 @@
-#include <TestCommandTokenizer.h>
+#include <Tokenizer/TestCommandTokenizer.h>
 #include <filesystem>
 
 namespace mali
@@ -31,7 +31,18 @@ namespace mali
         }
         else
         {
-            c = getChar(stream, token, c, isCommand);
+            if (c == '\"')
+            {
+                stream.read(&c, 1);
+                do
+                {
+                    c = getChar(stream, token, c, isString);
+                    if (c != '\"')
+                        return false;
+                } while (stream.read(&c, 1) && c == '\"');
+            }
+            else
+                c = getChar(stream, token, c, isCommand);
             if (token.empty() || !stream)
                 return false;
             tokens.emplace_back(token, "command", line);
@@ -49,8 +60,19 @@ namespace mali
                 }
                 else
                 {
-                    c = getChar(stream, token, c, isCommand);
-                    if (token.empty() || !stream)
+                    if (c == '\"')
+                    {
+                        stream.read(&c, 1);
+                        do
+                        {
+                            c = getChar(stream, token, c, isString);
+                            if (c != '\"')
+                                return false;
+                        } while (stream.read(&c, 1) && c == '\"');
+                    }
+                    else
+                        c = getChar(stream, token, c, isCommand);
+                    if (c == ':' || !stream)
                         return false;
                     tokens.emplace_back(token, "commandArgument", line);
                     token.clear();
@@ -65,7 +87,17 @@ namespace mali
 
     bool TestCommandTokenizer::isCommand(char c)
     {
-        return isPrintable(c) && c != ' ';
+        return isPrintable(c) && c != ' ' && c != ':';
+    }
+
+    bool TestCommandTokenizer::isVariable(char c)
+    {
+        return isAlpha(c) || c == '_';
+    }
+
+    bool TestCommandTokenizer::isString(char c)
+    {
+        return isPrintable(c) && c != '\"';
     }
 
     bool TestCommandTokenizer::tokenizeControl(std::istream &stream, std::vector<Token> &tokens, const char *type, int line)
@@ -99,10 +131,26 @@ namespace mali
         while (c == ' ')
         {
             stream.read(&c, 1);
-            c = getChar(stream, token, c, isAlpha);
-            if (token.empty() || !stream)
-                return false;
-            tokens.emplace_back(token, "controlArgument", line);
+            if (c == '\"')
+            {
+                stream.read(&c, 1);
+                do
+                {
+                    c = getChar(stream, token, c, isString);
+                    if (c != '\"')
+                        return false;
+                } while (stream.read(&c, 1) && c == '\"');
+                if (token.empty() || !stream)
+                    return false;
+                tokens.emplace_back(token, "controlArgument", line);
+            }
+            else
+            {
+                c = getChar(stream, token, c, isVariable);
+                if (token.empty() || !stream)
+                    return false;
+                tokens.emplace_back(token, "variableName", line);
+            }
             token.clear();
         }
         if (c != ':')

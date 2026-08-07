@@ -12,7 +12,7 @@
 
 namespace mali
 {
-    Test::Test(const char *name) : m_name(name), m_rootPath("./")
+    Test::Test(const std::string& name) : m_name(name), m_rootPath("./")
     {
     }
 
@@ -71,7 +71,7 @@ namespace mali
         return 0;
     }
 
-    void Test::setRootPath(const char *rootPath)
+    void Test::setRootPath(const std::string& rootPath)
     {
         m_rootPath = rootPath;
     }
@@ -79,6 +79,11 @@ namespace mali
     void Test::addTask(Task &&task, TaskType type)
     {
         m_tasks.emplace_back(TaskData{std::move(task), type});
+    }
+
+    const std::string &Test::getRootPath() const
+    {
+        return m_rootPath;
     }
 
     int Test::spawnProcess(const Task &args, const char *processPath, std::ostream &out, std::ostream &err) const
