@@ -7,7 +7,6 @@ namespace mali
         {
             std::make_pair("get", GetterParser::doGet),
             std::make_pair("malifile", GetterParser::doMalifile),
-            std::make_pair("malidir", GetterParser::doMalidir),
             std::make_pair("concat", GetterParser::doConcat),
     };
 
@@ -46,23 +45,6 @@ namespace mali
         if (state.next() && state.checkTokenType("controlArgument"))
         {
             if (std::filesystem::is_regular_file(state.getValue()))
-            {
-                std::filesystem::path path = std::filesystem::relative(state.getValue(), state.getTestRootPath());
-                state.addArg(path);
-                state.next();
-                return true;
-            }
-            else
-                std::cerr << "Line " << state.getLine() << ": " << state.getValue() << " is not a file." << std::endl;
-        }
-        return true;
-    }
-
-    bool GetterParser::doMalidir(ParserState &state)
-    {
-        if (state.next() && state.checkTokenType("controlArgument"))
-        {
-            if (std::filesystem::is_directory(state.getValue()))
             {
                 std::filesystem::path path = std::filesystem::relative(state.getValue(), state.getTestRootPath());
                 state.addArg(path);

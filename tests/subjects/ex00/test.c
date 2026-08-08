@@ -1,12 +1,12 @@
-#include <unistd.h>
+#include <stdio.h>
 
 int main(int ac, char **av)
 {
     if (ac == 2)
     {
-        write(STDOUT_FILENO, av[1], 1);
+        printf("%s", av[1]);
     }
-    write(STDOUT_FILENO, "\n", 1);
+    printf("\n");
 
     return 0;
 }

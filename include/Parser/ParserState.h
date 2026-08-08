@@ -43,6 +43,7 @@ namespace mali
         mali::Task m_task;
         mali::TaskType m_type;
         std::map<std::string, std::string> m_variables;
+        std::map<std::string, std::string> m_specialVariables;
         std::stack<std::pair<TokenIt, int>> m_flowControl;
         TokenIt m_it;
         TokenIt m_end;

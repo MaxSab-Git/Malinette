@@ -2,11 +2,14 @@
 #include <Test.h>
 #include <cstring>
 #include <filesystem>
+#include <exception>
+#include <stdexcept>
 
 namespace mali
 {
     ParserState::ParserState(TokenIt begin, TokenIt end) : m_type(TaskType::Preparation), m_it(begin), m_end(end)
     {
+        m_specialVariables["malidir"] = "./";
     }
 
     const Test &ParserState::getTest()
@@ -73,6 +76,8 @@ namespace mali
         if (std::filesystem::is_directory(m_it->value) && std::filesystem::exists(m_it->value))
         {
             m_test.setRootPath(m_it->value);
+            std::filesystem::path path = std::filesystem::relative("./", m_test.getRootPath()) / "";
+            m_specialVariables["malidir"] = path;
             return true;
         }
         return false;
@@ -121,12 +126,20 @@ namespace mali
 
     void ParserState::setVar(const std::string &value)
     {
+        auto it = m_specialVariables.find(m_it->value);
+        if (it != m_specialVariables.end())
+        {
+            throw std::invalid_argument("Line " + std::to_string(m_it->line) + ": Can't set value of special variable \"" + it->first + "\".");
+        }
         m_variables[m_it->value] = value;
     }
 
     const std::string *ParserState::getVar(const std::string &name) const
     {
-        auto it = m_variables.find(name);
+        auto it = m_specialVariables.find(name);
+        if (it != m_specialVariables.end())
+            return &it->second;
+        it = m_variables.find(name);
         return (it != m_variables.end()) ? &it->second : nullptr;
     }
 }

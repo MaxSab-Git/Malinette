@@ -21,6 +21,7 @@ SOURCES = $(SRC_DIR)main.cpp \
 OBJECTS = $(SOURCES:$(SRC_DIR)%.cpp=$(OBJ_DIR)%.o)
 COMPILER = c++
 FLAGS = -Wall -Wextra -Werror -O2
+ARGS = tests/subjects.mali -DTypes -DValues
 
 all:$(TARGET)
 
@@ -35,7 +36,7 @@ $(OBJ_DIR)%.o:$(SRC_DIR)%.cpp
 .PHONY: all clean fclean re launch
 
 launch:$(TARGET)
-	cd tests && ../$(TARGET) $(ARGS) > trace.txt
+	$(TARGET) $(ARGS) > trace.txt
 
 clean:
 	rm -f $(OBJECTS)

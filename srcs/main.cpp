@@ -73,8 +73,7 @@ int main(int ac, char **av)
                 std::cerr << "Invalid file : " << av[i] << std::endl;
                 return -1;
             }
-            if (chdir(dirname(av[i])) < 0)
-                exit(errno);
+            std::filesystem::current_path(std::filesystem::path(av[i]).parent_path());
         }
     }
     if (!file.is_open())
@@ -112,10 +111,8 @@ int main(int ac, char **av)
 
             if (i < tokens.size() - 1)
             {
-                if (!(std::strcmp(tokens[i + 1].type, "testContext") == 0 && std::strcmp(tokens[i].type, "testName") == 0) && !((std::strcmp(tokens[i + 1].type, "commandArgument") == 0 || std::strcmp(tokens[i + 1].type, "getter") == 0) && (std::strcmp(tokens[i].type, "command") == 0 || std::strcmp(tokens[i].type, "commandArgument") == 0)) && !((std::strcmp(tokens[i + 1].type, "parameter") == 0 || std::strcmp(tokens[i + 1].type, "controlArgument") == 0 || std::strcmp(tokens[i + 1].type, "variableName") == 0) && (std::strcmp(tokens[i].type, "function") == 0 || std::strcmp(tokens[i].type, "getter") == 0 || std::strcmp(tokens[i].type, "parameter") == 0)) && !(std::strcmp(tokens[i + 1].type, "implicit") == 0 && tokens[i + 1].value == "commandEnd"))
-                {
+                if (tokens[i].line != tokens[i + 1].line)
                     std::cout << "\n";
-                }
             }
         }
         std::cout << "\n"

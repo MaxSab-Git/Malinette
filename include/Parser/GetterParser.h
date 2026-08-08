@@ -16,7 +16,6 @@ namespace mali
     private:
         static bool doGet(ParserState& state);
         static bool doMalifile(ParserState& state);
-        static bool doMalidir(ParserState& state);
         static bool doConcat(ParserState& state);
 
         static const std::pair<const char *, bool (*)(ParserState& state)> s_supportedFunctions[];

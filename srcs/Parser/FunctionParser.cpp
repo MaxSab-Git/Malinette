@@ -7,7 +7,7 @@ namespace mali
 
     std::default_random_engine FunctionParser::s_engine(static_cast<unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count()));
     std::uniform_int_distribution<char> FunctionParser::s_randprint(32, 126);
-    std::uniform_int_distribution<int> FunctionParser::s_randalphanum(0, sizeof(s_alphanum) / sizeof(*s_alphanum) - 1);
+    std::uniform_int_distribution<int> FunctionParser::s_randalphanum(0, sizeof(s_alphanum) / sizeof(*s_alphanum) - 2);
 
     const std::pair<const char *, bool (*)(ParserState &state)> FunctionParser::s_supportedFunctions[] =
         {
