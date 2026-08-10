@@ -77,7 +77,7 @@ namespace mali
         {
             m_test.setRootPath(m_it->value);
             std::filesystem::path path = std::filesystem::relative("./", m_test.getRootPath()) / "";
-            m_specialVariables["malidir"] = path;
+            m_specialVariables["malidir"] = path.string();
             return true;
         }
         return false;

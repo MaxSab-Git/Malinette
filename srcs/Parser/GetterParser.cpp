@@ -47,7 +47,7 @@ namespace mali
             if (std::filesystem::is_regular_file(state.getValue()))
             {
                 std::filesystem::path path = std::filesystem::relative(state.getValue(), state.getTestRootPath());
-                state.addArg(path);
+                state.addArg(path.string());
                 state.next();
                 return true;
             }

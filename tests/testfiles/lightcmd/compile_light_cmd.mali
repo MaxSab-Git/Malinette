@@ -1,0 +1,5 @@
+Compile echo: src
+	clang -Wall -Wextra -Werror echo.c -o :concat malidir "echo.exe":
+
+Compile rm: src
+	clang -Wall -Wextra -Werror rm.c -o :concat malidir "rm.exe":

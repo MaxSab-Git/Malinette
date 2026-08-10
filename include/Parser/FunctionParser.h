@@ -24,7 +24,7 @@ namespace mali
         static const char s_alphanum[];
         
         static std::default_random_engine s_engine;
-        static std::uniform_int_distribution<char> s_randprint;
+        static std::uniform_int_distribution<int> s_randprint;
         static std::uniform_int_distribution<int> s_randalphanum;  
     };
 }

@@ -2,18 +2,15 @@
 #include <sstream>
 #include <iomanip>
 #include <filesystem>
+#include <SystemProcess.h>
 
 #include <vector>
-
-#include <unistd.h>
-#include <sys/wait.h>
-#include <fcntl.h>
 
 #include <Test.h>
 
 namespace mali
 {
-    Test::Test(const std::string& name) : m_name(name), m_rootPath("./")
+    Test::Test(const std::string &name) : m_name(name), m_rootPath("./")
     {
     }
 
@@ -24,7 +21,7 @@ namespace mali
         std::stringstream prevout;
         std::stringstream preverr;
 
-        std::cout << "Test name : " << m_name << "\n" 
+        std::cout << "Test name : " << m_name << "\n"
                   << "Test path : " << m_rootPath << std::endl;
 
         for (const TaskData &task : m_tasks)
@@ -64,7 +61,7 @@ namespace mali
                 std::cout << "==============================================================================================================================\n"
                           << std::endl;
             }
-            if (ret != 0)
+            if (ret != 0 && ret != 1)
                 return ret;
             std::swap(prevout, out);
             std::swap(preverr, err);
@@ -74,7 +71,7 @@ namespace mali
         return 0;
     }
 
-    void Test::setRootPath(const std::string& rootPath)
+    void Test::setRootPath(const std::string &rootPath)
     {
         m_rootPath = rootPath;
     }
@@ -91,73 +88,20 @@ namespace mali
 
     int Test::spawnProcess(const Task &args, const char *processPath, std::ostream &out, std::ostream &err) const
     {
-        int test_pipe[2];
-        int err_pipe[2];
-        if (pipe(test_pipe) < 0)
-            return 127;
-        if (pipe(err_pipe) < 0)
+        SystemProcess process(args, processPath);
+        if (!process.good())
         {
-            close(test_pipe[1]);
-            close(test_pipe[0]);
+            
+        std::cout << "fail." << std::endl;
             return 127;
         }
 
-        pid_t pid = fork();
-        if (pid == 0)
-        {
-            close(test_pipe[0]);
-            close(err_pipe[0]);
+        process.readOut(out);
+        out << std::flush;
 
-            std::filesystem::current_path(processPath);
+        process.readErr(err);
+        err << std::flush;
 
-            std::vector<const char *> argv;
-            argv.reserve(args.size() + 1);
-            for (const std::string &arg : args)
-                argv.push_back(arg.c_str());
-            argv.push_back(nullptr);
-
-            dup2(test_pipe[1], STDOUT_FILENO);
-            dup2(err_pipe[1], STDERR_FILENO);
-            close(test_pipe[1]);
-            close(err_pipe[1]);
-
-            if (argv.back() == nullptr)
-                execv(argv[0], const_cast<char *const *>(argv.data()));
-            _exit(127);
-        }
-
-        close(test_pipe[1]);
-        close(err_pipe[1]);
-
-        int status;
-        if (pid >= 0)
-        {
-            char c[1024];
-            int readed;
-
-            while (true)
-            {
-                readed = read(test_pipe[0], c, 1024);
-                if (readed <= 0)
-                    break;
-                out.write(c, readed);
-            }
-            out << std::flush;
-
-            while (true)
-            {
-                readed = read(err_pipe[0], c, 1024);
-                if (readed <= 0)
-                    break;
-                err.write(c, readed);
-            }
-            err << std::flush;
-            waitpid(pid, &status, 0);
-        }
-
-        close(test_pipe[0]);
-        close(err_pipe[0]);
-
-        return (pid < 0) ? -1 : WEXITSTATUS(status);
+        return process.wait();
     }
 }

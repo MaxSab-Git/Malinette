@@ -1,23 +1,26 @@
+Compile lightcmd: .
+	../bin/Malinette "testfiles\lightcmd\compile_light_cmd.mali"
+
 Test subjects 00: subjects/ex00
 	:randalphanum(32) program_name:
-	/bin/cc -Wall -Wextra -Werror test.c -o :get program_name:
+	clang -Wall -Wextra -Werror test.c -o :concat program_name ".exe":
 
 	:loop(10):
 	:randprint c:
-	/bin/echo :get c:
+	.:malifile "testfiles/lightcmd/echo.exe": :get c:
 	:compare:
-	.:get program_name: :get c:
+	.:concat program_name ".exe": :get c:
 	:end:
-	/bin/rm -f :get program_name:
+	.:malifile "testfiles/lightcmd/rm.exe": :concat program_name ".exe":
 
 Test subjects 01: subjects/ex01
 	:randalphanum(32) program_name:
-	/bin/cc -Wall -Wextra -Werror put_char.c :malifile "testfiles/ex00main.c": -o :get program_name:
+	clang -Wall -Wextra -Werror put_char.c :malifile "testfiles/ex00main.c": -o :concat program_name ".exe":
 
 	:loop(10):
 	:randprint(16) str:
-	/bin/echo :get str:
+	.:malifile "testfiles/lightcmd/echo.exe": :get str:
 	:compare:
-	.:get program_name: :get str:
+	.:concat program_name ".exe": :get str:
 	:end:
-	/bin/rm -f :get program_name:
+	.:malifile "testfiles/lightcmd/rm.exe": :concat program_name ".exe":

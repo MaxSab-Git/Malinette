@@ -10,8 +10,6 @@
 #include <filesystem>
 #include <string>
 #include <cstring>
-#include <unistd.h>
-#include <libgen.h>
 
 #include <Test.h>
 #include <Tokenizer/GlobalTokenizer.h>
