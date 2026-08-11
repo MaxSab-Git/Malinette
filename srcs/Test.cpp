@@ -68,7 +68,7 @@ namespace mali
                 printCommand(task.task);
                 if (lastRet != 0)
                 {
-                    std::cout << err.str() << '\n';
+                    std::cout << err.rdbuf() << '\n';
                     std::cout << "Result : KO\n";
                     printLine('=');
                     return lastRet;
@@ -80,7 +80,7 @@ namespace mali
                     printStream(out);
                 }
             }
-            std::cout << std::flush;
+            //std::cout << std::flush;
             std::swap(prevout, out);
             std::swap(preverr, err);
             out.str("");
@@ -129,7 +129,7 @@ namespace mali
 
     void Test::printStream(std::ostream &stream) const
     {
-        std::cout << static_cast<std::stringstream&>(stream).str() << '\n';
+        std::cout << stream.rdbuf() << '\n';
     }
 
     int Test::spawnProcess(const Task &args, const char *processPath, std::ostream &out, std::ostream &err)

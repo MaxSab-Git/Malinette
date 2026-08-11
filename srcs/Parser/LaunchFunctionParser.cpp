@@ -53,7 +53,10 @@ namespace mali
         {
             out << args[i];
         }
-        out << "\r" << std::endl;
+#ifdef _WIN32
+        out << "\r";
+#endif
+        out << std::endl;
         return 0;
     }
 }
