@@ -139,12 +139,12 @@ namespace mali
         m_variables[m_it->value] = value;
     }
 
-    const std::string *ParserState::getVar(const std::string &name) const
+    std::string *ParserState::getVar(const std::string &name) const
     {
         auto it = m_specialVariables.find(name);
         if (it != m_specialVariables.end())
-            return &it->second;
+            return const_cast<std::string*>(&it->second);
         it = m_variables.find(name);
-        return (it != m_variables.end()) ? &it->second : nullptr;
+        return (it != m_variables.end()) ? const_cast<std::string*>(&it->second) : nullptr;
     }
 }
