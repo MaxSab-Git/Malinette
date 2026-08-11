@@ -32,9 +32,8 @@ namespace mali
         char c[1024];
         DWORD readed;
 
-        while (true)
+        while (ReadFile(m_testPipe[0], c, 1024, &readed, nullptr) == TRUE)
         {
-            ReadFile(m_testPipe[0], c, 1024, &readed, nullptr);
             if (readed <= 0)
                 break;
             out.write(c, readed);
@@ -46,9 +45,8 @@ namespace mali
         char c[1024];
         DWORD readed;
 
-        while (true)
+        while (ReadFile(m_errPipe[0], c, 1024, &readed, nullptr) == TRUE)
         {
-            ReadFile(m_errPipe[0], c, 1024, &readed, nullptr);
             if (readed <= 0)
                 break;
             err.write(c, readed);

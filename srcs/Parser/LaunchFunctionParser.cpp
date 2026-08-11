@@ -1,5 +1,7 @@
 #include <Parser/LaunchFunctionParser.h>
 #include <filesystem>
+#include <iostream>
+#include <string>
 
 namespace mali
 {
@@ -51,7 +53,7 @@ namespace mali
         {
             out << args[i];
         }
-        out << std::endl;
+        out << "\r" << std::endl;
         return 0;
     }
 }

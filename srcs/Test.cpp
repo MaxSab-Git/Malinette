@@ -46,7 +46,7 @@ namespace mali
                     printLine('-');
 
                     std::cout << "mali output :\n";
-                    printStream(err);
+                    printStream(prevout);
                     printLine('-');
                     
                     std::cout << "Result : KO\n";
@@ -68,7 +68,7 @@ namespace mali
                 printCommand(task.task);
                 if (lastRet != 0)
                 {
-                    std::cout << err.rdbuf() << '\n';
+                    std::cout << err.str() << '\n';
                     std::cout << "Result : KO\n";
                     printLine('=');
                     return lastRet;
@@ -129,7 +129,7 @@ namespace mali
 
     void Test::printStream(std::ostream &stream) const
     {
-        std::cout << stream.rdbuf() << '\n';
+        std::cout << static_cast<std::stringstream&>(stream).str() << '\n';
     }
 
     int Test::spawnProcess(const Task &args, const char *processPath, std::ostream &out, std::ostream &err)
