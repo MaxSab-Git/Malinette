@@ -26,14 +26,15 @@ namespace mali
         const std::string& getValue() const;
         const std::string& getPrevValue() const;
         const std::string& getTestRootPath() const;
-        const std::string *getVar(const std::string& name) const;
+        std::string *getVar(const std::string& name) const;
 
         void setTestName();
         bool setTestRootPath();
         void setType(TaskType type);
+        void setPrintTestOut(bool printOut);
         void addArg();
         void addArg(const std::string& value);
-        void pushCommand();
+        void pushCommand(Command internalCommand = nullptr);
         void pushLoop(int iterations);
         bool popLoop();
         void setVar(const std::string& value);
@@ -42,6 +43,7 @@ namespace mali
         mali::Test m_test;
         mali::Task m_task;
         mali::TaskType m_type;
+        bool m_printTestOut;
         std::map<std::string, std::string> m_variables;
         std::map<std::string, std::string> m_specialVariables;
         std::stack<std::pair<TokenIt, int>> m_flowControl;

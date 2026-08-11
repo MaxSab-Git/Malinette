@@ -15,6 +15,7 @@ SOURCES = $(SRC_DIR)main.cpp \
 			$(SRC_PARSER_DIR)InstructionParser.cpp \
 			$(SRC_PARSER_DIR)CommandParser.cpp \
 			$(SRC_PARSER_DIR)FunctionParser.cpp \
+			$(SRC_PARSER_DIR)LaunchFunctionParser.cpp \
 			$(SRC_PARSER_DIR)GetterParser.cpp \
 			$(SRC_PARSER_DIR)ParameterParser.cpp \
 			$(SRC_PARSER_DIR)ParserState.cpp \
@@ -34,7 +35,7 @@ $(OBJ_DIR)%.o:$(SRC_DIR)%.cpp
 	mkdir -p $$(dirname $@)
 	$(COMPILER) $(FLAGS) -I$(INCLUDE_DIR) -c $< -o $@
 
-.PHONY: all clean fclean re launch
+.PHONY: all clean fclean re launch lightcmd
 
 launch:$(TARGET)
 	$(TARGET) $(ARGS) > trace.txt

@@ -15,6 +15,8 @@ namespace mali
         bool operator()(ParserState& state) override;
     private:
         static bool doCompare(ParserState& state);
+        static bool doLaunch(ParserState& state);
+        static bool doAppend(ParserState& state);
         static bool doLoop(ParserState& state);
         static bool doEnd(ParserState& state);
         static bool doRandprint(ParserState& state);

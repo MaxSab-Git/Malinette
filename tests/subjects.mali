@@ -1,26 +1,33 @@
-Compile lightcmd: .
-	../bin/Malinette "testfiles/lightcmd/compile_light_cmd.mali"
-
 Test subjects 00: subjects/ex00
 	:randalphanum(32) program_name:
-	clang -Wall -Wextra -Werror test.c -o :concat program_name ".exe":
+	:append program_name ".exe":
+
+	clang -Wall -Wextra -Werror test.c -o :get program_name:
 
 	:loop(10):
 	:randprint c:
-	.:concat malidir "testfiles/lightcmd/echo.exe": :get c:
+
+	:launch(echo) c:
 	:compare:
-	.:concat "./" program_name ".exe": :get c:
+	.:concat "./" program_name: :get c:
+
 	:end:
-	.:concat malidir "testfiles/lightcmd/rm.exe": :concat program_name ".exe":
+
+	:launch(remove) program_name:
 
 Test subjects 01: subjects/ex01
 	:randalphanum(32) program_name:
-	clang -Wall -Wextra -Werror put_char.c :malifile "testfiles/ex00main.c": -o :concat program_name ".exe":
+	:append program_name ".exe":
+
+	clang -Wall -Wextra -Werror put_char.c :malifile "testfiles/ex00main.c": -o :get program_name:
 
 	:loop(10):
 	:randprint(16) str:
-	.:concat malidir "testfiles/lightcmd/echo.exe": :get str:
+
+	:launch(echo) str:
 	:compare:
-	.:concat "./" program_name ".exe": :get str:
+	.:concat "./" program_name: :get str:
+
 	:end:
-	.:concat malidir "testfiles/lightcmd/rm.exe": :concat program_name ".exe":
+
+	:launch(remove) program_name:

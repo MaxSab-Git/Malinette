@@ -7,7 +7,7 @@
 
 namespace mali
 {
-    ParserState::ParserState(TokenIt begin, TokenIt end) : m_type(TaskType::Preparation), m_it(begin), m_end(end)
+    ParserState::ParserState(TokenIt begin, TokenIt end) : m_type(TaskType::Preparation), m_printTestOut(false), m_it(begin), m_end(end)
     {
         m_specialVariables["malidir"] = "./";
     }
@@ -88,6 +88,11 @@ namespace mali
         m_type = type;
     }
 
+    void ParserState::setPrintTestOut(bool printOut)
+    {
+        m_printTestOut = printOut;
+    }
+
     void ParserState::addArg()
     {
         m_task.emplace_back(m_it->value);
@@ -98,9 +103,9 @@ namespace mali
         m_task.emplace_back(value);
     }
 
-    void ParserState::pushCommand()
+    void ParserState::pushCommand(Command internalCommand)
     {
-        m_test.addTask(std::move(m_task), m_type);
+        m_test.addTask(std::move(m_task), m_type, internalCommand, m_printTestOut);
         m_type = TaskType::Preparation;
         m_task = mali::Task();
     }

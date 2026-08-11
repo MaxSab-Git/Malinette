@@ -6,6 +6,8 @@
 namespace mali
 {
     using Task = std::vector<std::string>;
+    using Command =  int (*)(const Task &args, const char *processPath, std::ostream &out, std::ostream &err);
+
     enum class TaskType
     {
         Preparation,
@@ -19,6 +21,8 @@ namespace mali
         {
             Task task;
             TaskType type;
+            Command command;
+            bool printOut;
         };
 
     public:
@@ -26,7 +30,7 @@ namespace mali
 
         void setRootPath(const std::string& name);
         int run() const;
-        void addTask(Task&& task, TaskType type);
+        void addTask(Task&& task, TaskType type, Command internalCommand = nullptr, bool printOut = false);
 
         const std::string& getRootPath() const;
 
@@ -37,6 +41,7 @@ namespace mali
 
         void printCommand(const Task& task) const;
         void printLine(char symbol) const;
-        int spawnProcess(const Task &args, const char *processPath, std::ostream &out, std::ostream &err) const;
+        void printStream(std::ostream& stream) const;
+        static int spawnProcess(const Task &args, const char *processPath, std::ostream &out, std::ostream &err);
     };
 }

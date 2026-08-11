@@ -16,19 +16,20 @@ namespace mali
 
     int Test::run() const
     {
-        std::stringstream out;
-        std::stringstream err;
-        std::stringstream prevout;
-        std::stringstream preverr;
+        std::stringstream out("");
+        std::stringstream err("");
+        std::stringstream prevout("");
+        std::stringstream preverr("");
         int lastRet = 0;
 
         std::cout << "Test name : " << m_name << "\n"
-                  << "Test path : " << m_rootPath << '\n' << std::endl;
+                  << "Test path : " << m_rootPath << '\n'
+                  << std::endl;
 
         printLine('=');
         for (const TaskData &task : m_tasks)
         {
-            lastRet = spawnProcess(task.task, m_rootPath.c_str(), out, err);
+            lastRet = task.command(task.task, m_rootPath.c_str(), out, err);
             if (lastRet == 127)
                 return -2;
             if (task.type == TaskType::Compare)
@@ -39,25 +40,31 @@ namespace mali
                 if (out.str() != prevout.str())
                 {
                     printLine('-');
-                    std::cout << "your output :\n"
-                              << out.rdbuf()
-                              << "\n";
+
+                    std::cout << "your output :\n";
+                    printStream(out);
                     printLine('-');
-                    std::cout << "mali output :\n"
-                              << prevout.rdbuf()
-                              << "\n";
+
+                    std::cout << "mali output :\n";
+                    printStream(err);
                     printLine('-');
+                    
                     std::cout << "Result : KO\n";
                 }
                 else
                 {
+                    if (task.printOut)
+                    {
+                        std::cout << "stdout > ";
+                        printStream(out);
+                    }
                     std::cout << "Result : OK\n";
                 }
                 printLine('-');
             }
             else if (task.type == TaskType::Preparation)
             {
-                std::cout << "Prepation >";
+                std::cout << "Preparation >";
                 printCommand(task.task);
                 if (lastRet != 0)
                 {
@@ -67,6 +74,11 @@ namespace mali
                     return lastRet;
                 }
                 std::cout << '\n';
+                if (task.printOut)
+                {
+                    std::cout << "stdout > ";
+                    printStream(out);
+                }
             }
             std::cout << std::flush;
             std::swap(prevout, out);
@@ -84,9 +96,12 @@ namespace mali
         m_rootPath = rootPath;
     }
 
-    void Test::addTask(Task &&task, TaskType type)
+    void Test::addTask(Task &&task, TaskType type, Command internalCommand, bool printOut)
     {
-        m_tasks.emplace_back(TaskData{std::move(task), type});
+        if (internalCommand)
+            m_tasks.emplace_back(TaskData{std::move(task), type, internalCommand, printOut});
+        else
+            m_tasks.emplace_back(TaskData{std::move(task), type, spawnProcess, printOut});
     }
 
     const std::string &Test::getRootPath() const
@@ -112,7 +127,12 @@ namespace mali
         std::cout << '\n';
     }
 
-    int Test::spawnProcess(const Task &args, const char *processPath, std::ostream &out, std::ostream &err) const
+    void Test::printStream(std::ostream &stream) const
+    {
+        std::cout << stream.rdbuf() << '\n';
+    }
+
+    int Test::spawnProcess(const Task &args, const char *processPath, std::ostream &out, std::ostream &err)
     {
         SystemProcess process(args, processPath);
         if (!process.good())

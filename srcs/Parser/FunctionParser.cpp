@@ -1,5 +1,7 @@
 #include <Parser/FunctionParser.h>
 #include <Parser/ParameterParser.h>
+#include <Parser/LaunchFunctionParser.h>
+#include <filesystem>
 
 namespace mali
 {
@@ -12,6 +14,8 @@ namespace mali
     const std::pair<const char *, bool (*)(ParserState &state)> FunctionParser::s_supportedFunctions[] =
         {
             std::make_pair("compare", FunctionParser::doCompare),
+            std::make_pair("launch", FunctionParser::doLaunch),
+            std::make_pair("append", FunctionParser::doAppend),
             std::make_pair("loop", FunctionParser::doLoop),
             std::make_pair("end", FunctionParser::doEnd),
             std::make_pair("randprint", FunctionParser::doRandprint),
@@ -29,10 +33,61 @@ namespace mali
         return false;
     }
 
-    bool mali::FunctionParser::doCompare(ParserState &state)
+    bool FunctionParser::doCompare(ParserState &state)
     {
         state.setType(TaskType::Compare);
         state.next();
+        return true;
+    }
+
+    bool FunctionParser::doLaunch(ParserState &state)
+    {
+        if (state.next() && state.checkTokenType("parameter"))
+        {
+            LaunchFunctionParser parser;
+            if (!parser(state))
+                return false;
+        }
+        else
+        {
+            std::cerr << "Line " << state.getPrevLine() << ": Missing parameter in function: \"" << state.getPrevValue() << "\"" << std::endl;
+            return false;
+        }
+        return true;
+    }
+
+    bool FunctionParser::doAppend(ParserState &state)
+    {
+        if (state.next() && state.checkTokenType("variableName"))
+        {
+            std::string *toAppend = state.getVar(state.getValue());
+            if (toAppend)
+            {
+                while (state.next())
+                {
+                    if (state.checkTokenType("variableName"))
+                    {
+                        const std::string *variable = state.getVar(state.getValue());
+                        if (variable)
+                            *toAppend += *variable;
+                        else
+                        {
+                            std::cerr << "Line " << state.getLine() << ": Variable \"" << state.getValue() << "\" is not initialized." << std::endl;
+                            return false;
+                        }
+                    }
+                    else if (state.checkTokenType("controlArgument"))
+                        *toAppend += state.getValue();
+                    else
+                        break;
+                }
+            }
+            else
+            {
+                std::cerr << "Line " << state.getLine() << ": Variable \"" << state.getValue() << "\" is not initialized." << std::endl;
+                return false;
+            }
+        }
         return true;
     }
 

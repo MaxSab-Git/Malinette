@@ -1,5 +1,6 @@
 #include <Tokenizer/TestCommandTokenizer.h>
 #include <filesystem>
+#include <cstring>
 
 namespace mali
 {
@@ -129,7 +130,10 @@ namespace mali
         {
             do
             {
-                c = getChar(stream, token, skipChar(stream, ' '), isNumeric);
+                if (std::strcmp(tokens.back().type, "function") == 0 && tokens.back().value == "launch")
+                    c = getChar(stream, token, skipChar(stream, ' '), isAlpha);
+                else
+                    c = getChar(stream, token, skipChar(stream, ' '), isNumeric);
                 if (c == ' ')
                     c = skipChar(stream, ' ');
                 if (token.empty() || !stream)

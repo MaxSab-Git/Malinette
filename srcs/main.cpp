@@ -17,10 +17,13 @@
 #include <Parser/TestNameParser.h>
 #include <Parser/ParserState.h>
 
+static bool printOut = false;
+
 std::vector<mali::Test> createTaskFromToken(const std::vector<mali::Token> &tokens)
 {
     std::vector<mali::Test> tests;
     mali::ParserState state(tokens.cbegin(), tokens.cend());
+    state.setPrintTestOut(printOut);
     mali::TestNameParser parser;
     while (state.ok())
     {
@@ -54,8 +57,9 @@ int main(int ac, char **av)
         bool debugValues = false;
     } options;
 
-    options.debugTypes = has_option("-DTypes", ac, av);
-    options.debugValues = has_option("-DValues", ac, av);
+    options.debugTypes = has_option("-DTypes", ac, av) != 0;
+    options.debugValues = has_option("-DValues", ac, av) != 0;
+    //printOut = has_option("-PrintOut", ac, av) != 0;
 
     mali::GlobalTokenizer gt;
     mali::TestCommandTokenizer tct;
