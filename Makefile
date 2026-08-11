@@ -39,6 +39,9 @@ $(OBJ_DIR)%.o:$(SRC_DIR)%.cpp
 launch:$(TARGET)
 	$(TARGET) $(ARGS) > trace.txt
 
+lightcmd: $(TARGET)
+	$(TARGET) "tests/testfiles/lightcmd/compile_light_cmd.mali"
+
 clean:
 	rm -f $(OBJECTS)
 

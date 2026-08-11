@@ -129,12 +129,12 @@ int main(int ac, char **av)
         int ret = test.run();
         if (ret != 0)
         {
-            std::cout << "Result: KO: error: " << ret << "\n"
+            std::cout << "Final result: KO: error: " << ret << "\n"
                       << std::endl;
         }
         else
         {
-            std::cout << "Result: OK\n"
+            std::cout << "Final result: OK\n"
                       << std::endl;
         }
     }

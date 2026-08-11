@@ -1,5 +1,5 @@
 Compile lightcmd: .
-	../bin/Malinette "testfiles\lightcmd\compile_light_cmd.mali"
+	../bin/Malinette "testfiles/lightcmd/compile_light_cmd.mali"
 
 Test subjects 00: subjects/ex00
 	:randalphanum(32) program_name:
@@ -7,11 +7,11 @@ Test subjects 00: subjects/ex00
 
 	:loop(10):
 	:randprint c:
-	.:malifile "testfiles/lightcmd/echo.exe": :get c:
+	.:concat malidir "testfiles/lightcmd/echo.exe": :get c:
 	:compare:
-	.:concat program_name ".exe": :get c:
+	.:concat "./" program_name ".exe": :get c:
 	:end:
-	.:malifile "testfiles/lightcmd/rm.exe": :concat program_name ".exe":
+	.:concat malidir "testfiles/lightcmd/rm.exe": :concat program_name ".exe":
 
 Test subjects 01: subjects/ex01
 	:randalphanum(32) program_name:
@@ -19,8 +19,8 @@ Test subjects 01: subjects/ex01
 
 	:loop(10):
 	:randprint(16) str:
-	.:malifile "testfiles/lightcmd/echo.exe": :get str:
+	.:concat malidir "testfiles/lightcmd/echo.exe": :get str:
 	:compare:
-	.:concat program_name ".exe": :get str:
+	.:concat "./" program_name ".exe": :get str:
 	:end:
-	.:malifile "testfiles/lightcmd/rm.exe": :concat program_name ".exe":
+	.:concat malidir "testfiles/lightcmd/rm.exe": :concat program_name ".exe":

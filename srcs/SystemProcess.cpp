@@ -201,7 +201,7 @@ namespace mali
     {
         if (!m_good)
             return 127;
-        
+
         int status;
         waitpid(m_handle, &status, 0);
         if (WIFEXITED(status))
@@ -209,7 +209,7 @@ namespace mali
         return 127;
     }
 
-    void SystemProcess::initProcess(const std::vector<std::string> &args, const char* processPath)
+    bool SystemProcess::initProcess(const std::vector<std::string> &args, const char* processPath)
     {
         if (pipe(m_testPipe) < 0)
             return false;
@@ -233,7 +233,9 @@ namespace mali
             ArgContainer argv;
             argv.reserve(args.size() + 1);
             for (const std::string &arg : args)
+            {
                 argv.push_back(arg.c_str());
+            }
             argv.push_back(nullptr);
 
             dup2(m_testPipe[1], STDOUT_FILENO);
@@ -243,9 +245,9 @@ namespace mali
 
             if (argv.back() == nullptr)
                 execvp(argv[0], const_cast<char *const *>(argv.data()));
+            std::cout << "fail." << std::endl;
             _exit(127);
         }
-
         close(m_testPipe[1]);
         close(m_errPipe[1]);
         return true;

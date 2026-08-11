@@ -38,7 +38,7 @@ launch:$(TARGET)
 	$(TARGET) $(ARGS) > trace.txt
 
 lightcmd: $(TARGET)
-	$(TARGET) tests\testfiles\lightcmd\compile_light_cmd.mali
+	$(TARGET) "tests/testfiles/lightcmd/compile_light_cmd.mali"
 
 clean:
 	-del /s srcs\*.o

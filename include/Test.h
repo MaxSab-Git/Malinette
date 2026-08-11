@@ -35,6 +35,8 @@ namespace mali
         std::string m_rootPath;
         std::vector<TaskData> m_tasks;
 
+        void printCommand(const Task& task) const;
+        void printLine(char symbol) const;
         int spawnProcess(const Task &args, const char *processPath, std::ostream &out, std::ostream &err) const;
     };
 }
