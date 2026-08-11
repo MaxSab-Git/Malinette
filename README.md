@@ -29,7 +29,7 @@
   make launch
   ```
   After launch, it should generate a "trace.txt" file in the root folder containing the result of all tests done by Malinette in the "tests/" folder using the file "tests/subjects.mali" added with some debug information.</br></br>
-- If you see "Final result: KO: error: 127" in "trace.txt" it's likely because "tests/subjects.mali" or "tests/testfiles/lightcmd/compile_light_cmd.mali" wants the use "clang" but don't find it, you can remedy this by changing the compiler used by these files with an another C compiler or by installing "clang" from <a href="https://llvm.org/">the official LLVM website</a> and adding it in your PATH.</br></br>
+- If you see "Final result: KO: error: 127" in "trace.txt" it's likely because "tests/subjects.mali" or wants the use "clang" but don't find it, you can remedy this by changing the compiler used by these files with an another C compiler or by installing "clang" from <a href="https://llvm.org/">the official LLVM website</a> and adding it in your PATH.</br></br>
 - To use Malinette, launch the following command:</br></br>
   ```bash
   ./Malinette [Options...] <Malifile>
@@ -51,7 +51,8 @@ Until then, it will stay like this unless I find someone to make it better.</br>
 
 - Even if Malinette is designed to be cross-platform, malifiles are not, some can works in a specific OS or computer and not in an other one, due to some commands being unusable or some program missing from the system or PATH of the end user.</br></br>
   
-- Speaking of incompatibilities... Malinette treating each commands as a program to execute, it can do command like "echo" no problem on Linux since it IS a program, what the same command on Windows IS NOT, That's right, you can't launch system commands like "echo" on Windows unless you put "cmd /c" before, and even there, IT WILL NOT WORK because Malinette do some preprocessing to improve cross-compatibilty of malifiles under the hood that will not permit this kind of things ! A temporary fix as been added in the "tests/testfiles/lightcmd/" folder being light versions of some Linux commands and can be compiled with... Malinette (yeah, this is not intentional or worth of a Makefile but kinda funny), They probably be soon replaced with new malifile functions later.</br></br>
+- Speaking of incompatibilities... Malinette treating each commands as a program to execute, it can do command like "echo" no problem on Linux since it IS a program, what the same command on Windows IS NOT, That's right, you can't put system commands like "echo" on Windows, and don't try "cmd /c", IT WILL NOT WORK, because Malinette do some preprocessing to improve cross-compatibilty of malifiles under the hood that will not permit this kind of things ! Add that with some weird quirks and you have a recipe for failure.</br>
+For these reasons, I strongly recommend using functions like ":launch(echo):" instead, at leasts, it works for everyone. More functions can be added if necessary.</br></br>
   
 - Malifile errors can be somewhat unclear, some efforts has been made to make them more useful but it's still not enough.</br>
 This system may improve over time.</br>

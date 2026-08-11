@@ -35,13 +35,10 @@ $(OBJ_DIR)%.o:$(SRC_DIR)%.cpp
 	mkdir -p $$(dirname $@)
 	$(COMPILER) $(FLAGS) -I$(INCLUDE_DIR) -c $< -o $@
 
-.PHONY: all clean fclean re launch lightcmd
+.PHONY: all clean fclean re launch
 
 launch:$(TARGET)
 	$(TARGET) $(ARGS) > trace.txt
-
-lightcmd: $(TARGET)
-	$(TARGET) "tests/testfiles/lightcmd/compile_light_cmd.mali"
 
 clean:
 	rm -f $(OBJECTS)
