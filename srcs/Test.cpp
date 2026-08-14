@@ -129,11 +129,14 @@ namespace mali
 
     void Test::printStream(std::ostream &stream) const
     {
-        std::cout << stream.rdbuf() << '\r';
+        std::cout << stream.rdbuf();
+#ifndef _WIN32
+        std::cout << '\n';
+#endif
         if (std::cout.rdstate() == std::ios::failbit)
         {
             std::cout.clear();
-            std::cout << "\n\r";
+            std::cout << "\n\n";
         }
     }
 
