@@ -8,8 +8,6 @@ namespace mali
     const char FunctionParser::s_alphanum[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
     std::default_random_engine FunctionParser::s_engine(static_cast<unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count()));
-    std::uniform_int_distribution<int> FunctionParser::s_randprint(32, 126);
-    std::uniform_int_distribution<int> FunctionParser::s_randalphanum(0, sizeof(s_alphanum) / sizeof(*s_alphanum) - 2);
 
     const std::pair<const char *, bool (*)(ParserState &state)> FunctionParser::s_supportedFunctions[] =
         {
@@ -18,6 +16,7 @@ namespace mali
             std::make_pair("append", FunctionParser::doAppend),
             std::make_pair("loop", FunctionParser::doLoop),
             std::make_pair("end", FunctionParser::doEnd),
+            std::make_pair("randint", FunctionParser::doRandint),
             std::make_pair("randprint", FunctionParser::doRandprint),
             std::make_pair("randalphanum", FunctionParser::doRandalphanum),
     };
@@ -110,14 +109,52 @@ namespace mali
         return true;
     }
 
+    bool FunctionParser::doRandint(ParserState &state)
+    {
+        ParameterParser parserMin(std::numeric_limits<int>::min());
+        ParameterParser parserMax(std::numeric_limits<int>::max());
+        const std::string &funcName = state.getValue();
+        int funcLine = state.getLine();
+        if (state.next())
+        {
+            if (parserMin(state))
+            {
+                if (!(state.next() && parserMax(state) && state.next()) || parserMin.getValue() > parserMax.getValue())
+                {
+                    std::cerr << "Line " << funcLine << ": Bad parameters in function: \"" << funcName << "\"" << std::endl;
+                    return false;
+                }
+            }
+
+            if (state.checkTokenType("variableName"))
+            {
+                std::uniform_int_distribution<int> randint(parserMin.getValue(), parserMax.getValue());
+                state.setVar(std::to_string(randint(s_engine)));
+                state.next();
+            }
+            else
+            {
+                std::cerr << "Line " << state.getPrevLine() << ": Missing argument in function: \"" << state.getPrevValue() << "\"" << std::endl;
+                return false;
+            }
+        }
+        else
+        {
+            std::cerr << "Line " << state.getPrevLine() << ": Missing argument in function: \"" << state.getPrevValue() << "\"" << std::endl;
+            return false;
+        }
+        return true;
+    }
+
     bool FunctionParser::doRandprint(ParserState &state)
     {
         ParameterParser parser(1);
         if (state.next() && (!parser(state) || state.next()) && state.checkTokenType("variableName"))
         {
+            std::uniform_int_distribution<int> randprint(32, 126);
             std::string newString;
             for (int j = 0; j < parser.getValue(); j++)
-                newString.push_back((char)s_randprint(s_engine));
+                newString.push_back((char)randprint(s_engine));
             state.setVar(newString);
             state.next();
         }
@@ -134,9 +171,10 @@ namespace mali
         ParameterParser parser(1);
         if (state.next() && (!parser(state) || state.next()) && state.checkTokenType("variableName"))
         {
+            std::uniform_int_distribution<int> randalphanum(0, sizeof(s_alphanum) / sizeof(*s_alphanum) - 2);
             std::string newString;
             for (int j = 0; j < parser.getValue(); j++)
-                newString.push_back(s_alphanum[s_randalphanum(s_engine)]);
+                newString.push_back(s_alphanum[randalphanum(s_engine)]);
             state.setVar(newString);
             state.next();
         }

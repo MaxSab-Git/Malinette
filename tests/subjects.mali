@@ -5,7 +5,7 @@ Test subjects 00: subjects/ex00
 	clang -Wall -Wextra -Werror test.c -o :get program_name:
 
 	:loop(10):
-	:randprint c:
+	:randint(-12, 10) c:
 
 	:launch(echo) c:
 	:compare:
@@ -22,7 +22,7 @@ Test subjects 01: subjects/ex01
 	clang -Wall -Wextra -Werror put_char.c :malifile "testfiles/ex00main.c": -o :get program_name:
 
 	:loop(10):
-	:randprint(16) str:
+	:randint str:
 
 	:launch(echo) str:
 	:compare:
