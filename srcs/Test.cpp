@@ -34,7 +34,7 @@ namespace mali
                 return -2;
             if (task.type == TaskType::Compare)
             {
-                std::cout << "\nCompare stdout >";
+                std::cout << "Compare stdout >";
                 printCommand(task.task);
                 std::cout << "\n";
                 if (out.str() != prevout.str())
@@ -80,7 +80,7 @@ namespace mali
                     printStream(out);
                 }
             }
-            //std::cout << std::flush;
+            std::cout << std::flush;
             std::swap(prevout, out);
             std::swap(preverr, err);
             out.str("");
@@ -129,7 +129,12 @@ namespace mali
 
     void Test::printStream(std::ostream &stream) const
     {
-        std::cout << stream.rdbuf() << '\n';
+        std::cout << stream.rdbuf();
+        if (std::cout.rdstate() == std::ios::failbit)
+        {
+            std::cout.clear();
+            std::cout << "\r\n";
+        }
     }
 
     int Test::spawnProcess(const Task &args, const char *processPath, std::ostream &out, std::ostream &err)

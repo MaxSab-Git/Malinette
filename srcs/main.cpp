@@ -59,7 +59,7 @@ int main(int ac, char **av)
 
     options.debugTypes = has_option("-DTypes", ac, av) != 0;
     options.debugValues = has_option("-DValues", ac, av) != 0;
-    //printOut = has_option("-PrintOut", ac, av) != 0;
+    printOut = has_option("-PrintOut", ac, av) != 0;
 
     mali::GlobalTokenizer gt;
     mali::TestCommandTokenizer tct;
