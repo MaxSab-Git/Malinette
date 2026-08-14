@@ -23,7 +23,7 @@ SOURCES = $(SRC_DIR)main.cpp \
 OBJECTS = $(SOURCES:$(SRC_DIR)%.cpp=$(OBJ_DIR)%.o)
 COMPILER = c++
 FLAGS = -Wall -Wextra -Werror -O2 -std=c++17
-ARGS = tests/subjects.mali -DTypes -DValues
+ARGS = tests/subjects.mali -DTypes -DValues -PrintOut
 
 all:$(TARGET)
 

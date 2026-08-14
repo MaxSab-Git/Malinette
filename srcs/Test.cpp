@@ -129,11 +129,11 @@ namespace mali
 
     void Test::printStream(std::ostream &stream) const
     {
-        std::cout << stream.rdbuf();
+        std::cout << stream.rdbuf() << '\r';
         if (std::cout.rdstate() == std::ios::failbit)
         {
             std::cout.clear();
-            std::cout << "\r\n";
+            std::cout << "\n\r";
         }
     }
 
