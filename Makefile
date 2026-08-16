@@ -38,7 +38,7 @@ $(OBJ_DIR)%.o:$(SRC_DIR)%.cpp
 .PHONY: all clean fclean re launch
 
 launch:$(TARGET)
-	$(TARGET) $(ARGS) > trace.txt
+	$(TARGET) $(ARGS)
 
 clean:
 	rm -f $(OBJECTS)

@@ -32,6 +32,8 @@ namespace mali
             lastRet = task.command(task.task, m_rootPath.c_str(), out, err);
             if (lastRet == 127)
                 return -2;
+            if (lastRet == -4)
+                return -4;
             if (task.type == TaskType::Compare)
             {
                 std::cout << "Compare stdout >";
@@ -69,6 +71,7 @@ namespace mali
                 if (lastRet != 0)
                 {
                     std::cout << err.rdbuf() << '\n';
+                    std::cout.clear();
                     std::cout << "Result : KO\n";
                     printLine('=');
                     return lastRet;
@@ -142,19 +145,17 @@ namespace mali
 
     int Test::spawnProcess(const Task &args, const char *processPath, std::ostream &out, std::ostream &err)
     {
-        SystemProcess process(args, processPath);
+        SystemProcess process(args, processPath, std::chrono::milliseconds(3000));
         if (!process.good())
         {
             std::cout << "Problem with process launch." << std::endl;
             return 127;
         }
 
-        process.readOut(out);
+        int res = process.readOut(out, err);
         out << std::flush;
-
-        process.readErr(err);
         err << std::flush;
 
-        return process.wait();
+        return res;
     }
 }

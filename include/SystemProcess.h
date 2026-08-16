@@ -5,10 +5,13 @@
 #else
 # include <unistd.h>
 # include <sys/wait.h>
+# include <poll.h>
+# include <fcntl.h>
 #endif
 
 #include <vector>
 #include <string>
+#include <chrono>
 
 namespace mali
 {
@@ -25,21 +28,24 @@ namespace mali
     class SystemProcess
     {
     public:
-        SystemProcess(const std::vector<std::string>& args, const char* processPath);
+        SystemProcess(const std::vector<std::string>& args,
+            const char* processPath,
+            std::chrono::nanoseconds timeout);
+
         SystemProcess(const SystemProcess&) = delete;
         SystemProcess& operator=(const SystemProcess&) = delete;
         ~SystemProcess();
 
-        void readOut(std::ostream& out);
-        void readErr(std::ostream& err);
+        int readOut(std::ostream& out, std::ostream &err);
         bool good() const;
-        int wait();
+        int wait(int &status);
 
     private:
         ProcessHandle m_handle;
         PipeHandle m_testPipe[2];
         PipeHandle m_errPipe[2];
         bool m_good;
+        std::chrono::nanoseconds m_timeout;
 
         bool initProcess(const std::vector<std::string>& args, const char* processPath);
     };

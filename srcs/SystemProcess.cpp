@@ -4,9 +4,12 @@
 
 namespace mali
 {
-    SystemProcess::SystemProcess(const std::vector<std::string> &args, const char* processPath)
+    SystemProcess::SystemProcess(const std::vector<std::string> &args,
+                                 const char *processPath,
+                                 std::chrono::nanoseconds timeout)
     {
         m_good = initProcess(args, processPath);
+        m_timeout = timeout;
     }
 
     bool SystemProcess::good() const
@@ -57,7 +60,7 @@ namespace mali
     {
         if (!m_good)
             return 127;
-        
+
         DWORD code;
         if (WaitForSingleObject(m_handle.hProcess, INFINITE) == WAIT_OBJECT_0)
         {
@@ -68,7 +71,7 @@ namespace mali
     }
 
     // Much more finicky than linux implementaion
-    bool SystemProcess::initProcess(const std::vector<std::string> &args, const char* processPath)
+    bool SystemProcess::initProcess(const std::vector<std::string> &args, const char *processPath)
     {
         SECURITY_ATTRIBUTES inherit;
         inherit.bInheritHandle = TRUE;
@@ -77,8 +80,7 @@ namespace mali
 
         if (CreatePipe(&m_testPipe[0], &m_testPipe[1], &inherit, 0) == FALSE)
             return false;
-        if (SetHandleInformation(m_testPipe[0], HANDLE_FLAG_INHERIT, 0) == FALSE
-            || CreatePipe(&m_errPipe[0], &m_errPipe[1], &inherit, 0) == FALSE)
+        if (SetHandleInformation(m_testPipe[0], HANDLE_FLAG_INHERIT, 0) == FALSE || CreatePipe(&m_errPipe[0], &m_errPipe[1], &inherit, 0) == FALSE)
         {
             CloseHandle(m_testPipe[0]);
             CloseHandle(m_testPipe[1]);
@@ -92,7 +94,7 @@ namespace mali
             CloseHandle(m_errPipe[1]);
             return false;
         }
-        
+
         ArgContainer argv;
         argv.reserve(128);
         for (const std::string &arg : args)
@@ -129,7 +131,7 @@ namespace mali
 
         BOOL result = CreateProcessW(
             nullptr,
-            const_cast<wchar_t*>(argv.c_str()),
+            const_cast<wchar_t *>(argv.c_str()),
             nullptr,
             nullptr,
             TRUE,
@@ -137,8 +139,7 @@ namespace mali
             nullptr,
             nullptr, // <-- For those who asks, no, just set this is not fine to replace double std::filesystem::current_path().
             &si,
-            &m_handle
-        );
+            &m_handle);
 
         std::filesystem::current_path(defaultPath);
 
@@ -167,47 +168,81 @@ namespace mali
         }
     }
 
-    void SystemProcess::readOut(std::ostream &out)
+    int SystemProcess::readOut(std::ostream &out, std::ostream &err)
     {
         char c[1024];
         int readed;
 
+        pollfd fds[2] = {
+            pollfd{m_testPipe[0], POLLIN, 0},
+            pollfd{m_errPipe[0], POLLIN, 0},
+        };
+
+        std::chrono::duration clock = std::chrono::steady_clock::now().time_since_epoch();
+        int waitres = 0;
+        int status = 0;
         while (true)
         {
-            readed = read(m_testPipe[0], c, 1024);
-            if (readed <= 0)
-                break;
-            out.write(c, readed);
+            int res = poll(fds, 2, 100);
+            if (res > 0)
+            {
+                if (fds[0].revents & POLLIN)
+                {
+                    errno = 0;
+                    while (true)
+                    {
+                        readed = read(m_testPipe[0], c, 1024);
+                        if (readed <= 0 || errno == EAGAIN)
+                            break;
+                        out.write(c, readed);
+                        out.clear();
+                    }
+                }
+                if (fds[1].revents & POLLIN)
+                {
+                    while (true)
+                    {
+                        errno = 0;
+                        readed = read(m_errPipe[0], c, 1024);
+                        if (readed <= 0 || errno == EAGAIN)
+                            break;
+                        err.write(c, readed);
+                        err.clear();
+                    }
+                }
+            }
+
+            waitres = SystemProcess::wait(status);
+            if (res < 0)
+                return -1;
+            if (waitres != 0)
+            {
+                if (waitres <= 0)
+                    return waitres;
+                if (waitres == m_handle)
+                {
+                    if (WIFEXITED(status))
+                        return WEXITSTATUS(status);
+                }
+                return -3;
+            }
+            if (std::chrono::steady_clock::now().time_since_epoch() - clock > m_timeout)
+            {
+                kill(m_handle, SIGKILL);
+                return -4;
+            }
         }
     }
 
-    void SystemProcess::readErr(std::ostream &err)
-    {
-        char c[1024];
-        int readed;
-
-        while (true)
-        {
-            readed = read(m_errPipe[0], c, 1024);
-            if (readed <= 0)
-                break;
-            err.write(c, readed);
-        }
-    }
-
-    int SystemProcess::wait()
+    int SystemProcess::wait(int &status)
     {
         if (!m_good)
             return 127;
 
-        int status;
-        waitpid(m_handle, &status, 0);
-        if (WIFEXITED(status))
-            return WEXITSTATUS(status);
-        return 127;
+        return waitpid(m_handle, &status, WNOHANG);
     }
 
-    bool SystemProcess::initProcess(const std::vector<std::string> &args, const char* processPath)
+    bool SystemProcess::initProcess(const std::vector<std::string> &args, const char *processPath)
     {
         if (pipe(m_testPipe) < 0)
             return false;
@@ -248,6 +283,8 @@ namespace mali
         }
         close(m_testPipe[1]);
         close(m_errPipe[1]);
+        fcntl(m_testPipe[0], F_SETFL, O_NONBLOCK);
+        fcntl(m_errPipe[0], F_SETFL, O_NONBLOCK);
         return true;
     }
 #endif
