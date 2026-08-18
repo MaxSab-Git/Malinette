@@ -30,29 +30,83 @@ namespace mali
         }
     }
 
-    void SystemProcess::readOut(std::ostream &out)
+    int SystemProcess::readOut(std::ostream &out, std::ostream &err)
     {
         char c[1024];
         DWORD readed;
 
+        pollfd fds[2] = {
+            pollfd{m_testPipe[0], POLLIN, 0},
+            pollfd{m_errPipe[0], POLLIN, 0},
+        };
+
+        std::chrono::duration clock = std::chrono::steady_clock::now().time_since_epoch();
+        int waitres = 0;
+        int status = 0;
+        while (true)
+        {
+            int res = poll(fds, 2, 100);
+            if (res > 0)
+            {
+                if (fds[0].revents & POLLIN)
+                {
+                    while (ReadFile(m_testPipe[0], c, 1024, &readed, nullptr) == TRUE)
+                    {
+                        readed = read(m_testPipe[0], c, 1024);
+                        if (readed <= 0)
+                            break;
+                        out.write(c, readed);
+                        out.clear();
+                    }
+                }
+                if (fds[1].revents & POLLIN)
+                {
+                    while (ReadFile(m_errPipe[0], c, 1024, &readed, nullptr) == TRUE)
+                    {
+                        if (readed <= 0)
+                            break;
+                        err.write(c, readed);
+                        err.clear();
+                    }
+                }
+            }
+
+            waitres = SystemProcess::wait(status);
+            if (res < 0)
+                return -1;
+            if (waitres != 0)
+            {
+                if (waitres <= 0)
+                    return waitres;
+                if (waitres == m_handle)
+                {
+                    if (WIFEXITED(status))
+                        return WEXITSTATUS(status);
+                }
+                return -3;
+            }
+            if (std::chrono::steady_clock::now().time_since_epoch() - clock > m_timeout)
+            {
+                kill(m_handle, SIGKILL);
+                return -4;
+            }
+        }
+
+        errno = 0;
         while (ReadFile(m_testPipe[0], c, 1024, &readed, nullptr) == TRUE)
         {
             if (readed <= 0)
                 break;
             out.write(c, readed);
+            out.clear();
         }
-    }
-
-    void SystemProcess::readErr(std::ostream &err)
-    {
-        char c[1024];
-        DWORD readed;
 
         while (ReadFile(m_errPipe[0], c, 1024, &readed, nullptr) == TRUE)
         {
             if (readed <= 0)
                 break;
             err.write(c, readed);
+            err.clear();
         }
     }
 
@@ -232,6 +286,25 @@ namespace mali
                 return -4;
             }
         }
+
+        errno = 0;
+        while (true)
+        {
+            readed = read(m_testPipe[0], c, 1024);
+            if (readed <= 0)
+                break;
+            out.write(c, readed);
+            out.clear();
+        }
+
+        while (true)
+        {
+            readed = read(m_errPipe[0], c, 1024);
+            if (readed <= 0)
+                break;
+            err.write(c, readed);
+            err.clear();
+        }
     }
 
     int SystemProcess::wait(int &status)
@@ -252,6 +325,9 @@ namespace mali
             close(m_testPipe[0]);
             return false;
         }
+
+        fcntl(m_testPipe[0], F_SETFL, O_NONBLOCK);
+        fcntl(m_errPipe[0], F_SETFL, O_NONBLOCK);
 
         m_handle = fork();
         if (m_handle < 0)
@@ -283,8 +359,6 @@ namespace mali
         }
         close(m_testPipe[1]);
         close(m_errPipe[1]);
-        fcntl(m_testPipe[0], F_SETFL, O_NONBLOCK);
-        fcntl(m_errPipe[0], F_SETFL, O_NONBLOCK);
         return true;
     }
 #endif
