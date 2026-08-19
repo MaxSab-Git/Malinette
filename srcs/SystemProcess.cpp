@@ -37,28 +37,24 @@ namespace mali
 
         char c[1024];
         DWORD readed;
-        DWORD toRead;
 
         std::chrono::duration clock = std::chrono::steady_clock::now().time_since_epoch();
         int waitres = 0;
         int status = 0;
-        std::cout << "start read\n";
         while (true)
         {
-            while (PeekNamedPipe(m_testPipe[0], nullptr, 0, nullptr, &toRead, nullptr) == TRUE && toRead > 0 && ReadFile(m_testPipe[0], c, 1024, &readed, nullptr) == TRUE)
+            while (ReadFile(m_testPipe[0], c, 1024, &readed, nullptr) == TRUE)
             {
                 if (readed <= 0)
                     break;
-                std::cout << "read out\n";
                 out.write(c, readed);
                 out.clear();
             }
 
-            while (PeekNamedPipe(m_errPipe[0], nullptr, 0, nullptr, &toRead, nullptr) == TRUE && toRead > 0 && ReadFile(m_errPipe[0], c, 1024, &readed, nullptr) == TRUE)
+            while (ReadFile(m_errPipe[0], c, 1024, &readed, nullptr) == TRUE)
             {
                 if (readed <= 0)
                     break;
-                std::cout << "read err\n";
                 err.write(c, readed);
                 err.clear();
             }
@@ -66,7 +62,6 @@ namespace mali
             waitres = wait(status);
             if (waitres == WAIT_TIMEOUT)
             {
-                std::cout << "waiting...\n";
                 if (std::chrono::steady_clock::now().time_since_epoch() - clock > m_timeout)
                 {
                     TerminateProcess(m_handle.hProcess, -4);
@@ -78,22 +73,19 @@ namespace mali
                 break;
             }
         }
-        std::cout << "finish\n";
 
-        while (PeekNamedPipe(m_testPipe[0], nullptr, 0, nullptr, &toRead, nullptr) == TRUE && toRead > 0 && ReadFile(m_testPipe[0], c, 1024, &readed, nullptr) == TRUE)
+        while (ReadFile(m_testPipe[0], c, 1024, &readed, nullptr) == TRUE)
         {
             if (readed <= 0)
                 break;
-            std::cout << "final read out\n";
             out.write(c, readed);
             out.clear();
         }
 
-        while (PeekNamedPipe(m_errPipe[0], nullptr, 0, nullptr, &toRead, nullptr) == TRUE && toRead > 0 && ReadFile(m_errPipe[0], c, 1024, &readed, nullptr) == TRUE)
+        while (ReadFile(m_errPipe[0], c, 1024, &readed, nullptr) == TRUE)
         {
             if (readed <= 0)
                 break;
-            std::cout << "final read err\n";
             err.write(c, readed);
             err.clear();
         }
@@ -129,15 +121,17 @@ namespace mali
         inherit.nLength = sizeof(inherit);
         inherit.lpSecurityDescriptor = nullptr;
 
+        DWORD pipeMode = PIPE_NOWAIT;
+
         if (CreatePipe(&m_testPipe[0], &m_testPipe[1], &inherit, 0) == FALSE)
             return false;
-        if (SetHandleInformation(m_testPipe[0], HANDLE_FLAG_INHERIT, 0) == FALSE || CreatePipe(&m_errPipe[0], &m_errPipe[1], &inherit, 0) == FALSE)
+        if (SetHandleInformation(m_testPipe[0], HANDLE_FLAG_INHERIT, 0) == FALSE || SetNamedPipeHandleState(m_testPipe[0], &pipeMode, nullptr, nullptr) == FALSE || CreatePipe(&m_errPipe[0], &m_errPipe[1], &inherit, 0) == FALSE)
         {
             CloseHandle(m_testPipe[0]);
             CloseHandle(m_testPipe[1]);
             return false;
         }
-        if (SetHandleInformation(m_errPipe[0], HANDLE_FLAG_INHERIT, 0) == FALSE)
+        if (SetHandleInformation(m_errPipe[0], HANDLE_FLAG_INHERIT, 0) == FALSE || SetNamedPipeHandleState(m_errPipe[0], &pipeMode, nullptr, nullptr) == FALSE)
         {
             CloseHandle(m_testPipe[0]);
             CloseHandle(m_testPipe[1]);
