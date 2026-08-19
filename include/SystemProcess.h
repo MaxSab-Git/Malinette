@@ -2,6 +2,7 @@
 
 #ifdef _WIN32
 # include <Windows.h>
+# include <winsock.h>
 #else
 # include <unistd.h>
 # include <sys/wait.h>

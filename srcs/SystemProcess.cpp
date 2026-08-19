@@ -32,94 +32,91 @@ namespace mali
 
     int SystemProcess::readOut(std::ostream &out, std::ostream &err)
     {
+        if (!m_good)
+            return 127;
+
         char c[1024];
         DWORD readed;
-
-        pollfd fds[2] = {
-            pollfd{m_testPipe[0], POLLIN, 0},
-            pollfd{m_errPipe[0], POLLIN, 0},
-        };
+        DWORD toRead;
 
         std::chrono::duration clock = std::chrono::steady_clock::now().time_since_epoch();
         int waitres = 0;
         int status = 0;
+        std::cout << "start read\n";
         while (true)
         {
-            int res = poll(fds, 2, 100);
-            if (res > 0)
+            while (PeekNamedPipe(m_testPipe[0], nullptr, 0, nullptr, &toRead, nullptr) == TRUE && toRead > 0 && ReadFile(m_testPipe[0], c, 1024, &readed, nullptr) == TRUE)
             {
-                if (fds[0].revents & POLLIN)
-                {
-                    while (ReadFile(m_testPipe[0], c, 1024, &readed, nullptr) == TRUE)
-                    {
-                        readed = read(m_testPipe[0], c, 1024);
-                        if (readed <= 0)
-                            break;
-                        out.write(c, readed);
-                        out.clear();
-                    }
-                }
-                if (fds[1].revents & POLLIN)
-                {
-                    while (ReadFile(m_errPipe[0], c, 1024, &readed, nullptr) == TRUE)
-                    {
-                        if (readed <= 0)
-                            break;
-                        err.write(c, readed);
-                        err.clear();
-                    }
-                }
+                if (readed <= 0)
+                    break;
+                std::cout << "read out\n";
+                out.write(c, readed);
+                out.clear();
             }
 
-            waitres = SystemProcess::wait(status);
-            if (res < 0)
-                return -1;
-            if (waitres != 0)
+            while (PeekNamedPipe(m_errPipe[0], nullptr, 0, nullptr, &toRead, nullptr) == TRUE && toRead > 0 && ReadFile(m_errPipe[0], c, 1024, &readed, nullptr) == TRUE)
             {
-                if (waitres <= 0)
-                    return waitres;
-                if (waitres == m_handle)
-                {
-                    if (WIFEXITED(status))
-                        return WEXITSTATUS(status);
-                }
-                return -3;
+                if (readed <= 0)
+                    break;
+                std::cout << "read err\n";
+                err.write(c, readed);
+                err.clear();
             }
-            if (std::chrono::steady_clock::now().time_since_epoch() - clock > m_timeout)
+
+            waitres = wait(status);
+            if (waitres == WAIT_TIMEOUT)
             {
-                kill(m_handle, SIGKILL);
-                return -4;
+                std::cout << "waiting...\n";
+                if (std::chrono::steady_clock::now().time_since_epoch() - clock > m_timeout)
+                {
+                    TerminateProcess(m_handle.hProcess, -4);
+                    return -4;
+                }
+            }
+            else
+            {
+                break;
             }
         }
+        std::cout << "finish\n";
 
-        errno = 0;
-        while (ReadFile(m_testPipe[0], c, 1024, &readed, nullptr) == TRUE)
+        while (PeekNamedPipe(m_testPipe[0], nullptr, 0, nullptr, &toRead, nullptr) == TRUE && toRead > 0 && ReadFile(m_testPipe[0], c, 1024, &readed, nullptr) == TRUE)
         {
             if (readed <= 0)
                 break;
+            std::cout << "final read out\n";
             out.write(c, readed);
             out.clear();
         }
 
-        while (ReadFile(m_errPipe[0], c, 1024, &readed, nullptr) == TRUE)
+        while (PeekNamedPipe(m_errPipe[0], nullptr, 0, nullptr, &toRead, nullptr) == TRUE && toRead > 0 && ReadFile(m_errPipe[0], c, 1024, &readed, nullptr) == TRUE)
         {
             if (readed <= 0)
                 break;
+            std::cout << "final read err\n";
             err.write(c, readed);
             err.clear();
         }
+
+        if (waitres == WAIT_OBJECT_0)
+            return status;
+        return waitres;
     }
 
-    int SystemProcess::wait()
+    int SystemProcess::wait(int &status)
     {
         if (!m_good)
             return 127;
+        
+        DWORD res = WaitForSingleObject(m_handle.hProcess, 100);
+        if (res != WAIT_OBJECT_0)
+            return res;
 
         DWORD code;
-        if (WaitForSingleObject(m_handle.hProcess, INFINITE) == WAIT_OBJECT_0)
+        if (GetExitCodeProcess(m_handle.hProcess, &code) == TRUE)
         {
-            GetExitCodeProcess(m_handle.hProcess, &code);
-            return code;
+            status = code;
+            return res;
         }
         return 127;
     }
@@ -271,14 +268,7 @@ namespace mali
                 return -1;
             if (waitres != 0)
             {
-                if (waitres <= 0)
-                    return waitres;
-                if (waitres == m_handle)
-                {
-                    if (WIFEXITED(status))
-                        return WEXITSTATUS(status);
-                }
-                return -3;
+                break;
             }
             if (std::chrono::steady_clock::now().time_since_epoch() - clock > m_timeout)
             {
@@ -305,6 +295,15 @@ namespace mali
             err.write(c, readed);
             err.clear();
         }
+
+        if (waitres <= 0)
+            return waitres;
+        if (waitres == m_handle)
+        {
+            if (WIFEXITED(status))
+                return WEXITSTATUS(status);
+        }
+        return -3;
     }
 
     int SystemProcess::wait(int &status)
