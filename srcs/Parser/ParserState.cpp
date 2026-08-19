@@ -7,7 +7,7 @@
 
 namespace mali
 {
-    ParserState::ParserState(TokenIt begin, TokenIt end) : m_type(TaskType::Preparation), m_printTestOut(false), m_it(begin), m_end(end)
+    ParserState::ParserState(TokenIt begin, TokenIt end) : m_type(TaskType::Preparation), m_printTestOut(false), m_timeout(std::chrono::milliseconds(3000)), m_it(begin), m_end(end)
     {
         m_specialVariables["malidir"] = "./";
     }
@@ -22,6 +22,7 @@ namespace mali
         m_test = mali::Test();
         m_task = mali::Task();
         m_type = TaskType::Preparation;
+        m_timeout = std::chrono::milliseconds(3000);
         m_variables.clear();
         m_flowControl = std::stack<std::pair<TokenIt, int>>();
     }
@@ -93,6 +94,11 @@ namespace mali
         m_printTestOut = printOut;
     }
 
+    void ParserState::setTimeout(std::chrono::milliseconds timeout)
+    {
+        m_timeout = timeout;
+    }
+
     void ParserState::addArg()
     {
         m_task.emplace_back(m_it->value);
@@ -105,7 +111,7 @@ namespace mali
 
     void ParserState::pushCommand(Command internalCommand)
     {
-        m_test.addTask(std::move(m_task), m_type, internalCommand, m_printTestOut);
+        m_test.addTask(std::move(m_task), m_type, internalCommand, m_printTestOut, m_timeout);
         m_type = TaskType::Preparation;
         m_task = mali::Task();
     }
@@ -139,12 +145,12 @@ namespace mali
         m_variables[m_it->value] = value;
     }
 
-    std::string *ParserState::getVar(const std::string &name) const
+    std::string *ParserState::getVar(const std::string &name)
     {
         auto it = m_specialVariables.find(name);
         if (it != m_specialVariables.end())
-            return const_cast<std::string*>(&it->second);
+            return &it->second;
         it = m_variables.find(name);
-        return (it != m_variables.end()) ? const_cast<std::string*>(&it->second) : nullptr;
+        return (it != m_variables.end()) ? &it->second : nullptr;
     }
 }

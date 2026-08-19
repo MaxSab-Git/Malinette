@@ -14,6 +14,7 @@ namespace mali
             std::make_pair("compare", FunctionParser::doCompare),
             std::make_pair("launch", FunctionParser::doLaunch),
             std::make_pair("append", FunctionParser::doAppend),
+            std::make_pair("timeout", FunctionParser::doTimeout),
             std::make_pair("loop", FunctionParser::doLoop),
             std::make_pair("end", FunctionParser::doEnd),
             std::make_pair("randint", FunctionParser::doRandint),
@@ -87,6 +88,15 @@ namespace mali
                 return false;
             }
         }
+        return true;
+    }
+
+    bool FunctionParser::doTimeout(ParserState &state)
+    {
+        ParameterParser parser(3000);
+        if (nextAndParse(state, parser))
+            state.next();
+        state.setTimeout(std::chrono::milliseconds(parser.getValue()));
         return true;
     }
 

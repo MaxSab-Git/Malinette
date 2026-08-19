@@ -4,6 +4,7 @@
 #include <stack>
 #include <Tokenizer/Tokenizer.h>
 #include <Test.h>
+#include <chrono>
 
 namespace mali
 {
@@ -26,12 +27,13 @@ namespace mali
         const std::string& getValue() const;
         const std::string& getPrevValue() const;
         const std::string& getTestRootPath() const;
-        std::string *getVar(const std::string& name) const;
+        std::string *getVar(const std::string& name);
 
         void setTestName();
         bool setTestRootPath();
         void setType(TaskType type);
         void setPrintTestOut(bool printOut);
+        void setTimeout(std::chrono::milliseconds timeout);
         void addArg();
         void addArg(const std::string& value);
         void pushCommand(Command internalCommand = nullptr);
@@ -44,6 +46,7 @@ namespace mali
         mali::Task m_task;
         mali::TaskType m_type;
         bool m_printTestOut;
+        std::chrono::milliseconds m_timeout;
         std::map<std::string, std::string> m_variables;
         std::map<std::string, std::string> m_specialVariables;
         std::stack<std::pair<TokenIt, int>> m_flowControl;

@@ -29,7 +29,7 @@ namespace mali
         printLine('=');
         for (const TaskData &task : m_tasks)
         {
-            lastRet = task.command(task.task, m_rootPath.c_str(), out, err);
+            lastRet = task.command(task.task, m_rootPath.c_str(), out, err, task.timeout);
             if (lastRet == 127)
                 return -2;
             if (lastRet == -4)
@@ -99,12 +99,12 @@ namespace mali
         m_rootPath = rootPath;
     }
 
-    void Test::addTask(Task &&task, TaskType type, Command internalCommand, bool printOut)
+    void Test::addTask(Task &&task, TaskType type, Command internalCommand, bool printOut, std::chrono::milliseconds timeout)
     {
         if (internalCommand)
-            m_tasks.emplace_back(TaskData{std::move(task), type, internalCommand, printOut});
+            m_tasks.emplace_back(TaskData{std::move(task), type, internalCommand, printOut, timeout});
         else
-            m_tasks.emplace_back(TaskData{std::move(task), type, spawnProcess, printOut});
+            m_tasks.emplace_back(TaskData{std::move(task), type, spawnProcess, printOut, timeout});
     }
 
     const std::string &Test::getRootPath() const
@@ -143,9 +143,9 @@ namespace mali
         }
     }
 
-    int Test::spawnProcess(const Task &args, const char *processPath, std::ostream &out, std::ostream &err)
+    int Test::spawnProcess(const Task &args, const char *processPath, std::ostream &out, std::ostream &err, std::chrono::milliseconds timeout)
     {
-        SystemProcess process(args, processPath, std::chrono::milliseconds(3000));
+        SystemProcess process(args, processPath, timeout);
         if (!process.good())
         {
             std::cout << "Problem with process launch." << std::endl;

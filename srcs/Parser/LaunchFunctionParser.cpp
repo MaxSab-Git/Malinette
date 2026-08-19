@@ -44,10 +44,11 @@ namespace mali
         return false;
     }
 
-    int LaunchFunctionParser::launchEcho(const Task &args, const char *processPath, std::ostream &out, std::ostream &err)
+    int LaunchFunctionParser::launchEcho(const Task &args, const char *processPath, std::ostream &out, std::ostream &err, std::chrono::milliseconds timeout)
     {
         (void)processPath;
         (void)err;
+        (void)timeout;
 
         for (std::size_t i = 1; i < args.size(); i++)
         {
@@ -61,10 +62,11 @@ namespace mali
     }
 }
 
-int mali::LaunchFunctionParser::launchRemove(const Task &args, const char *processPath, std::ostream &out, std::ostream &err)
+int mali::LaunchFunctionParser::launchRemove(const Task &args, const char *processPath, std::ostream &out, std::ostream &err, std::chrono::milliseconds timeout)
 {
     (void)processPath;
     (void)out;
+    (void)timeout;
 
     for (std::size_t i = 1; i < args.size(); i++)
     {

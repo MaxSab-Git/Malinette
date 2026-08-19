@@ -17,6 +17,7 @@ namespace mali
         static bool doCompare(ParserState& state);
         static bool doLaunch(ParserState& state);
         static bool doAppend(ParserState& state);
+        static bool doTimeout(ParserState& state);
         static bool doLoop(ParserState& state);
         static bool doEnd(ParserState& state);
         static bool doRandint(ParserState& state);

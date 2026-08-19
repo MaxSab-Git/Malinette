@@ -4,6 +4,7 @@ Test subjects 00: subjects/ex00
 
 	clang -Wall -Wextra -Werror test.c -o :get program_name:
 
+	:timeout(1000):
 	:loop(10):
 	:randint(-12, 10) c:
 
@@ -21,6 +22,7 @@ Test subjects 01: subjects/ex01
 
 	clang -Wall -Wextra -Werror put_char.c :malifile "testfiles/ex00main.c": -o :get program_name:
 
+	:timeout(1000):
 	:loop(10):
 	:randint str:
 
