@@ -24,7 +24,7 @@ Test subjects 01: subjects/ex01
 
 	:timeout(1000):
 	:loop(10):
-	:randint str:
+	:randbase64(16) str:
 
 	:launch(echo) str:
 	:compare:
