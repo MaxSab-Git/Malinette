@@ -30,6 +30,7 @@ namespace mali
         for (const TaskData &task : m_tasks)
         {
             lastRet = task.command(task.task, m_rootPath.c_str(), out, err, task.timeout);
+
             if (lastRet == 127)
                 return -2;
             if (lastRet == -4)
@@ -50,7 +51,7 @@ namespace mali
                     std::cout << "mali output :\n";
                     printStream(prevout);
                     printLine('-');
-                    
+
                     std::cout << "Result : KO\n";
                 }
                 else
@@ -71,6 +72,7 @@ namespace mali
                 if (lastRet != 0)
                 {
                     std::cout << err.rdbuf() << '\n';
+                    err.seekg(0, std::ios::beg);
                     std::cout.clear();
                     std::cout << "Result : KO\n";
                     printLine('=');
@@ -130,9 +132,10 @@ namespace mali
         std::cout << '\n';
     }
 
-    void Test::printStream(std::ostream &stream) const
+    void Test::printStream(std::istream &stream) const
     {
         std::cout << stream.rdbuf();
+        stream.seekg(0, std::ios::beg);
 #ifndef _WIN32
         std::cout << '\n';
 #endif

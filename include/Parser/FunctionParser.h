@@ -23,9 +23,11 @@ namespace mali
         static bool doRandint(ParserState& state);
         static bool doRandprint(ParserState& state);
         static bool doRandalphanum(ParserState& state);
+        static bool doRandbase64(ParserState& state);
 
         static const std::pair<const char *, bool (*)(ParserState& state)> s_supportedFunctions[];
         static const char s_alphanum[];
+        static const char s_base64[];
         
         static std::default_random_engine s_engine; 
     };

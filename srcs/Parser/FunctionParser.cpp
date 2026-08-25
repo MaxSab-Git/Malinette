@@ -6,6 +6,7 @@
 namespace mali
 {
     const char FunctionParser::s_alphanum[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const char FunctionParser::s_base64[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_";
 
     std::default_random_engine FunctionParser::s_engine(static_cast<unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count()));
 
@@ -20,6 +21,7 @@ namespace mali
             std::make_pair("randint", FunctionParser::doRandint),
             std::make_pair("randprint", FunctionParser::doRandprint),
             std::make_pair("randalphanum", FunctionParser::doRandalphanum),
+            std::make_pair("randbase64", FunctionParser::doRandbase64),
     };
 
     bool FunctionParser::operator()(ParserState &state)
@@ -185,6 +187,26 @@ namespace mali
             std::string newString;
             for (int j = 0; j < parser.getValue(); j++)
                 newString.push_back(s_alphanum[randalphanum(s_engine)]);
+            state.setVar(newString);
+            state.next();
+        }
+        else
+        {
+            std::cerr << "Line " << state.getPrevLine() << ": Missing argument in function: \"" << state.getPrevValue() << "\"" << std::endl;
+            return false;
+        }
+        return true;
+    }
+
+    bool FunctionParser::doRandbase64(ParserState &state)
+    {
+        ParameterParser parser(1);
+        if (state.next() && (!parser(state) || state.next()) && state.checkTokenType("variableName"))
+        {
+            std::uniform_int_distribution<int> randbase64(0, sizeof(s_base64) / sizeof(*s_base64) - 2);
+            std::string newString;
+            for (int j = 0; j < parser.getValue(); j++)
+                newString.push_back(s_base64[randbase64(s_engine)]);
             state.setVar(newString);
             state.next();
         }

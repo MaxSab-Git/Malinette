@@ -75,7 +75,8 @@ int main(int ac, char **av)
                 std::cerr << "Invalid file : " << av[i] << std::endl;
                 return -1;
             }
-            std::filesystem::current_path(std::filesystem::path(av[i]).parent_path());
+            std::filesystem::path current(std::filesystem::relative(av[i]));
+            std::filesystem::current_path("." / current.parent_path());
         }
     }
     if (!file.is_open())

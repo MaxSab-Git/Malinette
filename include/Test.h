@@ -43,7 +43,7 @@ namespace mali
 
         void printCommand(const Task& task) const;
         void printLine(char symbol) const;
-        void printStream(std::ostream& stream) const;
+        void printStream(std::istream& stream) const;
         static int spawnProcess(const Task &args, const char *processPath, std::ostream &out, std::ostream &err, std::chrono::milliseconds timeout);
     };
 }

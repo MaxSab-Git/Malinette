@@ -121,7 +121,7 @@ namespace mali
 
         if (!stream.read(&c, 1))
             return false;
-        c = getChar(stream, token, c, isAlpha);
+        c = getChar(stream, token, c, isAlphaNumeric);
         if (token.empty() || !stream)
             return false;
         tokens.emplace_back(token, type, line);
