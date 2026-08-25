@@ -1,7 +1,7 @@
 # Malinette
 ### A Unit Test program using "*.mali" files (refered as malifiles) as source.
 - Mainly made for Linux, but should compile fine with most POSIX compliant systems including, in theory, MacOS.</br></br>
-- This program has mainly been tested on the WSL version of Linux Ubuntu and on Windows, other systems may not be supported as claimed.</br></br>
+- This program has mainly been tested on Linux Kubuntu and on Windows, other systems may not be supported as claimed.</br></br>
 - The Windows port is quite dirty, mostly the WinMakefile because of my lack of practice on Windows CMD, but it should works fine.</br></br>
 
 # How to compile
@@ -44,6 +44,8 @@ All debug options are formatted like so: -D[info].</br>
 Currently supported options are:</br>
 - -DTypes: will display all tokens type before outputting any test result (ex: testName, command...).</br>
 - -DValues: will display all tokens values before outputting any test result (ex: Test Subject 00, clang...).</br>
+### Misc
+- -PrintOut: all commands will print their output, :lauch(): function included.</br>
 
 # Disclaimers
 - Like say above, WinMakefile has been made with ducts and tapes, it's not my priority to learn how Windows CMD works for the moment.</br>
@@ -51,8 +53,8 @@ Until then, it will stay like this unless I find someone to make it better.</br>
 
 - Even if Malinette is designed to be cross-platform, malifiles are not, some can works in a specific OS or computer and not in an other one, due to some commands being unusable or some program missing from the system or PATH of the end user.</br></br>
   
-- Speaking of incompatibilities... Malinette treating each commands as a program to execute, it can do command like "echo" no problem on Linux since it IS a program, what the same command on Windows IS NOT, That's right, you can't put system commands like "echo" on Windows, and don't try "cmd /c", IT WILL NOT WORK, because Malinette do some preprocessing to improve cross-compatibilty of malifiles under the hood that will not permit this kind of things ! Add that with some weird quirks and you have a recipe for failure.</br>
-For these reasons, I strongly recommend using functions like ":launch(echo):" instead, at leasts, it works for everyone. More functions can be added if necessary.</br></br>
+- Speaking of incompatibilities... Malinette treating each commands as a program to execute, it can do command like "echo" no problem on Linux since it IS a program, what the same command on Windows IS NOT, That's right, you can't put system commands like "echo" on Windows, and don't try "cmd /c", IT WILL NOT WORK, because Malinette do some preprocessing to improve cross-compatibilty of malifiles under the hood that will not permit this kind of things ! Add that with some weird quirks and you have a recipe for desaster.</br>
+For those reasons, I strongly recommend using functions like ":launch(echo):" instead, at least, it will work for everyone. More functions can be added if necessary.</br></br>
   
 - Malifile errors can be somewhat unclear, some efforts has been made to make them more useful but it's still not enough.</br>
 This system may improve over time.</br>
